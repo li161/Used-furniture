@@ -95,14 +95,14 @@ const data=[
 {name:'The Maker’s\nTable',eyebrow:'ARCHIVE NO. 003 · c. 1930',desc:'每一道划痕，都是一次制作。',period:'1930 · WORKSHOP',material:'OAK / IRON',story:'它不是被陈列的家具，而是一张真正工作过的桌子。刀痕、墨迹和被锤子击出的浅坑仍在桌面上。上一位主人离开时，最后一件作品还没有完成。',make:makeDesk}
 ];
 data.forEach((d,i)=>{const group=new THREE.Group();const model=d.make();model.scale.setScalar(i===0?1.05:i===1?.94:.96);group.add(model);group.position.set(0,0,0);scene.add(group);objects.push({group,model,data:d,index:i})});
-let current=0,targetYaw=0,yaw=0,targetX=0,focusX=0,drag=false,lastX=0,lastY=0,hover=-1,opened=false;
+let current=0,targetYaw=0,yaw=0,drag=false,lastX=0,lastY=0,startX=0,startY=0,hover=-1,opened=false;
 const ray=new THREE.Raycaster(),pointer=new THREE.Vector2();
 function updateText(){const d=data[current];$('#coordNo').textContent=String(current+1).padStart(2,'0')+' / 03';$('#coordType').textContent=['FOUND IN THE WAREHOUSE','FOUND IN THE BACK ROOM','FOUND IN THE WORKSHOP'][current];$('#titleEyebrow').textContent=d.eyebrow;$('#titleName').innerHTML=d.name.replace('\n','<br>');$('#titleDesc').textContent=d.desc;document.querySelectorAll('#progress button').forEach((b,i)=>b.classList.toggle('active',i===current))}
 function moveTo(i){if(i===current)return;current=(i+3)%3;updateText();$('#fade').classList.add('on');setTimeout(()=>$('#fade').classList.remove('on'),160);$('#inspect').classList.remove('open');opened=false;targetYaw=0}
 function hit(e){const r=renderer.domElement.getBoundingClientRect();pointer.x=(e.clientX-r.left)/r.width*2-1;pointer.y=-((e.clientY-r.top)/r.height)*2+1;ray.setFromCamera(pointer,camera);const hits=ray.intersectObjects(objects[current].group.children,true);return hits.length?0:-1}
 renderer.domElement.addEventListener('pointermove',e=>{if(drag){targetYaw+=(e.clientX-lastX)*.004;lastX=e.clientX;lastY=e.clientY;return}const h=hit(e);hover=h;$('#inspectHint').classList.toggle('show',h>=0&&!opened)});
-renderer.domElement.addEventListener('pointerdown',e=>{drag=true;lastX=e.clientX;lastY=e.clientY;renderer.domElement.setPointerCapture(e.pointerId)});
-renderer.domElement.addEventListener('pointerup',e=>{if(!drag)return;drag=false;if(Math.abs(e.clientX-lastX)<4&&Math.abs(e.clientY-lastY)<4&&hover>=0)openRecord()});
+renderer.domElement.addEventListener('pointerdown',e=>{drag=true;startX=lastX=e.clientX;startY=lastY=e.clientY;renderer.domElement.setPointerCapture(e.pointerId)});
+renderer.domElement.addEventListener('pointerup',e=>{if(!drag)return;drag=false;if(Math.hypot(e.clientX-startX,e.clientY-startY)<6&&hover>=0)openRecord()});
 renderer.domElement.addEventListener('pointercancel',()=>drag=false);
 renderer.domElement.addEventListener('wheel',e=>{if(Math.abs(e.deltaY)>8)moveTo(current+(e.deltaY>0?1:-1))},{passive:true});
 window.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='PageDown')moveTo(current+1);if(e.key==='ArrowLeft'||e.key==='PageUp')moveTo(current-1);if(e.key==='Escape')closeRecord()});
