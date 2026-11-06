@@ -26,21 +26,21 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const scene=new THREE.Scene();
-scene.background=new THREE.Color('#39352d');
-scene.fog=new THREE.FogExp2('#39352d',.018);
+scene.background=new THREE.Color('#777064');
+scene.fog=new THREE.FogExp2('#777064',.012);
 const camera=new THREE.PerspectiveCamera(59,innerWidth/innerHeight,.1,120);
-camera.position.set(0,2.15,11.5);
+camera.position.set(0,2.05,14.2);
 const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);
 renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=1.22;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.toneMappingExposure=1.38;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 document.querySelector('#scene').appendChild(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xe8d9bb,0x29251e,1.15));
-const sun=new THREE.DirectionalLight(0xffe0ad,3.1);sun.position.set(-7,10,7);sun.castShadow=true;
+scene.add(new THREE.HemisphereLight(0xfff0d6,0x37332b,1.65));
+const sun=new THREE.DirectionalLight(0xffe8c8,4.2);sun.position.set(-8,12,12);sun.castShadow=true;
 sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-13;sun.shadow.camera.right=13;sun.shadow.camera.top=13;sun.shadow.camera.bottom=-13;scene.add(sun);
 function glow(x,y,z,p=30,color=0xffc98c,range=10){const l=new THREE.PointLight(color,p,range,2);l.position.set(x,y,z);scene.add(l)}
-glow(-4,5,0,42);glow(4,5,-8,34);glow(0,4,-19,25);
+glow(-4,5,0,28);glow(4,5,-8,24);glow(0,4,-19,20);
 
 const material=(c,r=.88,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
 const brick=material('#71675a'),agedBrick=material('#655b4d'),wood=material('#493322'),darkWood=material('#30251c'),red=material('#71372b'),stone=material('#777064'),roof=material('#34352f'),metal=material('#393a36',.62,.65);
@@ -83,14 +83,13 @@ priceTag(-5.2,1.3,1.8,'旧木器');priceTag(5.8,1.55,-8.6,'可议价');priceTag(
 // 中央留出曲折通道，家具模型在两侧形成高低错落的旧货山
 const loader=new GLTFLoader();
 const assets=[
- {name:'中国茶桌',url:'https://files.innerscene.com/library/chinese-tea-table-a34cc5dd/5a435ea630e6f8e16e44/polyhaven-chinese-tea-table.glb',width:1.35,positions:[[-3.9,3.0,.3],[3.8,-8.6,-.2],[1.7,-20,.15]]},
- {name:'中国屏风',url:'https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/chinese_screen_panels.glb',width:1.8,positions:[[5.1,1.5,.1],[-5.3,-11,-.2]]},
- {name:'中国柜',url:'https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/chinese_cabinet.glb',width:1.7,positions:[[-5.7,-4.8,.05],[5.7,-17,.1]]},
- {name:'中式条案',url:'https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/chinese_console_table.glb',width:1.8,positions:[[5.6,4.4,-.1],[-5.5,-20,.1]]},
- {name:'中国坐具',url:'https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/chinese_armchair.glb',width:.9,positions:[[-2.7,1.3,.1],[2.7,-3.5,-.15],[-2.8,-8.2,.2],[2.9,-14,.1]]},
- {name:'中式矮柜',url:'https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/chinese_commode.glb',width:1.35,positions:[[-5.7,-15,-.1],[5.6,-23,.15]]}
+ {name:'中式老茶桌',url:'https://files.innerscene.com/library/chinese-tea-table-a34cc5dd/5a435ea630e6f8e16e44/polyhaven-chinese-tea-table.glb',width:1.15,positions:[[-3.7,5.8,.28],[3.9,-5.5,-.18],[-3.4,-15.8,.2],[3.6,-23,.1]]},
+ {name:'旧皮沙发',url:'https://files.innerscene.com/library/victorian-leather-sofa-3a3ebd7e/5e875109d66562a32c61/polyhaven-sofa-03.glb',width:2.65,positions:[[-4.8,1.6,.12],[4.7,-9.2,-.15],[-4.7,-19,.18]]},
+ {name:'老木扶手椅',url:'https://files.innerscene.com/library/victorian-armchair-f000c44f/a2ca475762c8930d0da6/polyhaven-armchair-01.glb',width:1.05,positions:[[3.1,3.6,-.18],[-3.2,-3.8,.22],[3.2,-13.4,.12],[-3.1,-22,.3]]},
+ {name:'雕花木沙发',url:'https://files.innerscene.com/library/victorian-carved-sofa-812af357/702f0a24fccb9531bad8/polyhaven-sofa-01.glb',width:2.45,positions:[[4.7,7.5,.16],[-4.8,-10.8,-.2],[4.8,-25,.18]]},
+ {name:'旧木案几',url:'https://files.innerscene.com/library/victorian-console-table-8d86c520/c206978e362f1a904176/polyhaven-classicconsole-01.glb',width:1.65,positions:[[-5.8,8.2,.05],[5.8,-2.5,-.12],[-5.8,-25,.08]]}
 ];
-let loaded=0,failed=0;
+let loaded=0,failed=0;const expected=assets.reduce((n,a)=>n+a.positions.length,0);
 function place(root,spec,pos){
  const holder=new THREE.Group();holder.position.set(pos[0],0,pos[1]);holder.rotation.y=pos[2];scene.add(holder);
  const model=root.clone(true);const b=new THREE.Box3().setFromObject(model);const size=b.getSize(new THREE.Vector3());
@@ -101,12 +100,12 @@ function place(root,spec,pos){
 }
 assets.forEach(spec=>loader.load(spec.url,gltf=>{
  spec.positions.forEach(p=>place(gltf.scene,spec,p));loaded+=spec.positions.length;
- document.documentElement.dataset.realFurniture=String(loaded);
- document.querySelector('#status').textContent='实物模型已入场 '+loaded+' 件';
+ document.documentElement.dataset.realFurniture=String(loaded);document.documentElement.dataset.expectedFurniture=String(expected);
+ document.querySelector('#status').textContent='实物家具已加载 '+loaded+' 件';
 },undefined,error=>{
  failed++;console.error('模型加载失败：'+spec.name,error);
  document.documentElement.dataset.assetError=String(failed);
- document.querySelector('#status').textContent='实物模型 '+loaded+' 件 · '+failed+' 项资源未加载';
+ document.querySelector('#status').textContent='已加载 '+loaded+' 件 · '+failed+' 组资源失败';
 }));
 
 // 轻微漂浮尘埃，避免过度粒子化
@@ -117,13 +116,13 @@ const dust=new THREE.Points(dustGeo,new THREE.PointsMaterial({color:'#e8d4ad',si
 
 let targetX=0,targetY=0,lookX=0,lookY=0,travel=0,lastTouch=0;
 window.addEventListener('pointermove',e=>{targetX=(e.clientX/innerWidth-.5)*.68;targetY=(e.clientY/innerHeight-.5)*.2});
-window.addEventListener('wheel',e=>{travel=THREE.MathUtils.clamp(travel+e.deltaY*.006,-1.5,13)},{passive:true});
+window.addEventListener('wheel',e=>{travel=THREE.MathUtils.clamp(travel+e.deltaY*.006,-1.5,16)},{passive:true});
 window.addEventListener('touchstart',e=>lastTouch=e.touches[0].clientY,{passive:true});
-window.addEventListener('touchmove',e=>{const y=e.touches[0].clientY;targetX=(e.touches[0].clientX/innerWidth-.5)*.5;travel=THREE.MathUtils.clamp(travel+(lastTouch-y)*.018,-1.5,13);lastTouch=y},{passive:true});
+window.addEventListener('touchmove',e=>{const y=e.touches[0].clientY;targetX=(e.touches[0].clientX/innerWidth-.5)*.5;travel=THREE.MathUtils.clamp(travel+(lastTouch-y)*.018,-1.5,16);lastTouch=y},{passive:true});
 const clock=new THREE.Clock();
 function animate(){requestAnimationFrame(animate);const t=clock.getElapsedTime();lookX+=(targetX-lookX)*.035;lookY+=(targetY-lookY)*.035;
- camera.position.x=lookX*2.5;camera.position.y=2.15+lookY+Math.sin(t*.32)*.016;camera.position.z=11.5-travel;
- camera.lookAt(lookX*1.5,1.75+lookY*1.3,-6-travel*.82);
+ camera.position.x=lookX*2.5;camera.position.y=2.15+lookY+Math.sin(t*.32)*.016;camera.position.z=14.2-travel;
+ camera.lookAt(lookX*1.5,1.9+lookY*1.3,-6.8-travel*.82);
  dust.rotation.y=Math.sin(t*.08)*.025;renderer.render(scene,camera)}
 animate();
 window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
