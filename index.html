@@ -123,7 +123,7 @@ const beamMat=new THREE.MeshBasicMaterial({color:0xffd69a,transparent:true,opaci
 for(let i=0;i<4;i++){const b=mesh(new THREE.PlaneGeometry(2.3,10),beamMat,warehouse,-6+i*2.8,3.6,-1.2);b.rotation.y=-.48;b.rotation.x=.18}
 const floorDust=new THREE.Mesh(new THREE.PlaneGeometry(22,12),new THREE.MeshBasicMaterial({color:0xb88d5a,transparent:true,opacity:.055,depthWrite:false}));floorDust.rotation.x=-Math.PI/2;floorDust.position.set(-3,.01,-1);warehouse.add(floorDust);
 // shelves, crates, discarded drawer fronts, antique mirror frame
-for(let x of [-11,10]){for(let y of [1.8,3.8,5.8]){box(warehouse,x,y,-3,2.4,.16,.9,mats.darkWood);for(let j=0;j<3;j++)createCrate(x-0.65+j*.65,y+.45,-3.1,.45)}}
+for(let x of [-11,10]){for(let y of [1.8,3.8,5.8]){box(warehouse,x,y,-3,2.4,.16,.9,mats.darkWood);for(let j=0;j<3;j++)warehouse.add(createCrate(x-0.65+j*.65,y+.45,-3.1,.45))}}
 for(let i=0;i<5;i++){const c=createCrate(-7+i*.9,.02,3.5+(i%2)*.5,.85);warehouse.add(c)}
 const mirrorFrame=mesh(new THREE.BoxGeometry(1.45,2.2,.14),mats.wood,warehouse,8,2.1,2);const mirror=mesh(new THREE.PlaneGeometry(1.1,1.8),new THREE.MeshStandardMaterial({color:'#5d5a4f',metalness:.38,roughness:.32}),warehouse,8,2.1,1.91);
 for(let i=0;i<6;i++){const paper=box(warehouse,-5+i*.42,.03,1.6,.38,.015,.5,new THREE.MeshStandardMaterial({color:i%2?'#bca77f':'#8c795d',roughness:1}));paper.rotation.y=(Math.random()-.5)*.3}
