@@ -1,177 +1,119 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#211b16"><meta name="description" content="SECOND LIFE — The Forgotten Furniture Warehouse">
-<title>SECOND LIFE — The Forgotten Furniture Warehouse</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#171613">
+<title>SECOND LIFE — Objects Outlive Us</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#e6d8c4;--muted:#a99a85;--gold:#b28b5d;--line:#d4bd9b38;--serif:'Cormorant Garamond','Noto Serif SC',serif;--mono:'DM Mono',monospace}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#211b16;color:var(--ink);font-family:var(--serif)}button{font:inherit;color:inherit}button:focus-visible{outline:1px solid var(--gold);outline-offset:4px}
-#stage{position:fixed;inset:0;background:radial-gradient(ellipse at 56% 40%,#594532 0,#30251b 42%,#171411 100%)}#world{position:absolute;inset:0}canvas{display:block;width:100%;height:100%;touch-action:none;outline:0}
-.shade{position:absolute;inset:0;pointer-events:none;z-index:1;background:linear-gradient(90deg,#171411f5 0%,#171411dc 22%,#17141142 48%,#17141116 76%,#171411a8 100%),linear-gradient(0deg,#171411e8 0%,transparent 34%,#17141150 100%);mix-blend-mode:multiply}
-header{position:fixed;z-index:5;left:0;right:0;top:0;height:78px;padding:0 4.2vw;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#18130f82,transparent)}
-.brand{display:flex;align-items:center;gap:13px;font:500 12px var(--serif);letter-spacing:.24em;text-transform:uppercase}.brandmark{width:24px;height:29px;border:1px solid #b28b5d;border-radius:13px 13px 2px 2px;position:relative}.brandmark:after{content:"";position:absolute;inset:5px 5px 0;border:1px solid #b28b5d;border-bottom:0;border-radius:9px 9px 0 0}
-.topnav{display:flex;gap:30px}.topnav button,.save{border:0;background:none;cursor:pointer;font:8px var(--mono);letter-spacing:.16em;color:#b8a992;transition:.2s}.topnav button.active,.topnav button:hover{color:#f0d8b4}.save{border:1px solid #c9a77760;padding:10px 15px;color:#dfc8a7}
-.hero{position:fixed;z-index:3;left:7vw;top:23%;width:350px;pointer-events:none;transition:.5s}.hero.hide{opacity:0;transform:translateY(-10px)}.eyebrow{font:8px var(--mono);letter-spacing:.23em;color:#c29b6c;text-transform:uppercase}h1{font:500 clamp(52px,6.2vw,86px)/.82 var(--serif);letter-spacing:-.035em;margin:26px 0 20px;color:#e8d9c5}h1 span{font-style:italic;color:#b58b5e}.hero p{font:12px/2.1 'Noto Serif SC',serif;color:#b8a995;max-width:290px}.enter{margin-top:30px;display:flex;align-items:center;gap:13px;font:8px var(--mono);letter-spacing:.17em;color:#d8c3a4}.enter i{font-style:normal;width:34px;height:34px;border:1px solid #c7a57780;border-radius:50%;display:grid;place-items:center;font-size:15px}
-.object-note{position:fixed;z-index:3;right:7vw;top:35%;width:210px;padding:17px 0;border-top:1px solid #d2b58b75;border-bottom:1px solid #d2b58b75;transition:.35s}.object-note.hide{opacity:0;transform:translateX(10px)}.object-note .number{font:8px var(--mono);letter-spacing:.17em;color:#c29b6c}.object-note h2{font:500 25px/1.05 var(--serif);margin:12px 0 8px;color:#ebdcc7}.object-note p{font:10px/1.8 'Noto Serif SC',serif;color:#b7a58d;margin:0}.object-note button{margin-top:15px;padding:0;border:0;background:none;font:8px var(--mono);letter-spacing:.14em;color:#dfc49d;cursor:pointer}
-.bottom{position:fixed;z-index:5;left:4.2vw;right:4.2vw;bottom:24px;display:flex;align-items:end;justify-content:space-between}.caption{font:8px var(--mono);letter-spacing:.18em;line-height:1.9;color:#a9977f}.controls{display:flex;align-items:center;gap:15px}.hint{font:8px/1.8 var(--mono);letter-spacing:.12em;color:#a9977f;text-align:right}.arrows{display:flex;gap:7px}.arrows button{width:34px;height:34px;border:1px solid #d0b58b55;border-radius:50%;background:#211b1670;cursor:pointer;font-size:15px;transition:.2s}.arrows button:hover{background:#b28b5d;color:#211b16}
-.thumbs{position:fixed;z-index:5;bottom:74px;right:4.2vw;display:flex;gap:8px}.thumb{width:50px;height:50px;border:1px solid #d0b58b50;border-radius:50%;background:#251c15c9;display:grid;place-items:center;cursor:pointer;color:#b7a58d;font:8px var(--mono);transition:.25s}.thumb.active{border-color:#d8b27b;box-shadow:0 0 0 4px #c49b6320;color:#f1d5ac}
-.status{position:fixed;z-index:8;left:50%;top:92px;transform:translate(-50%,-8px);padding:9px 13px;border:1px solid #c7a57745;background:#211b16dc;backdrop-filter:blur(10px);font:8px var(--mono);letter-spacing:.14em;color:#dfc7a4;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap}.status.show{opacity:1;transform:translate(-50%,0)}
-.panel{position:fixed;z-index:7;right:4.2vw;top:50%;transform:translate(15px,-50%);width:min(340px,35vw);padding:25px;background:#211a14ed;border:1px solid #c9a77745;box-shadow:0 20px 60px #0009;backdrop-filter:blur(18px);opacity:0;pointer-events:none;transition:.35s}.panel.open{opacity:1;pointer-events:auto;transform:translate(0,-50%)}.panel .close{float:right;border:0;background:none;font-size:22px;cursor:pointer;color:#c5a77e}.panel h3{font:500 30px var(--serif);margin:14px 0 8px}.panel p{font:11px/2 'Noto Serif SC',serif;color:#b7a58e}.facts{border-top:1px solid var(--line);margin:20px 0}.fact{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font:8px var(--mono);letter-spacing:.06em;color:#bca98e}.fact span:last-child{color:#d0a36d;text-align:right}.panel .action{width:100%;border:1px solid #c09a68;background:#a17a4e;color:#1d1711;padding:13px;font:8px var(--mono);letter-spacing:.13em;cursor:pointer}
-.scene-switch{position:fixed;z-index:6;left:50%;top:92px;transform:translateX(-50%);display:flex;gap:4px;padding:4px;border:1px solid #c7a57745;border-radius:30px;background:#211b16dc;backdrop-filter:blur(12px);opacity:0;pointer-events:none;transition:.25s}.scene-switch.show{opacity:1;pointer-events:auto}.scene-switch button{border:0;background:transparent;padding:9px 13px;border-radius:22px;font:8px var(--mono);letter-spacing:.1em;cursor:pointer;color:#b7a58d}.scene-switch button.active{background:#a17a4e;color:#1d1711}
-.memory{position:fixed;z-index:7;left:50%;top:50%;transform:translate(-50%,-45%);width:min(460px,86vw);padding:30px;background:#211a14f2;border:1px solid #c9a77745;box-shadow:0 25px 80px #000a;opacity:0;pointer-events:none;transition:.3s}.memory.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}.memory h3{font:500 34px var(--serif);margin:16px 0}.memory p{font:12px/2.1 'Noto Serif SC',serif;color:#b8a68f}.memory button{border:0;background:none;padding:10px 0;font:8px var(--mono);letter-spacing:.13em;cursor:pointer;color:#d4b58a}
-.loading{position:fixed;z-index:4;left:50%;top:50%;transform:translate(-50%,-50%);font:8px var(--mono);letter-spacing:.18em;color:#c8a574}.loading.done{opacity:0;pointer-events:none}
-.credit{position:fixed;z-index:2;left:7vw;bottom:28px;font:7px var(--mono);letter-spacing:.08em;color:#806d58}
-@media(max-width:760px){header{height:66px;padding:0 5vw}.topnav{gap:12px}.topnav button{font-size:7px}.topnav button:nth-child(2),.topnav button:nth-child(4){display:none}.brand{font-size:10px}.hero{left:6vw;top:17%;width:72vw}.hero h1{font-size:57px;margin:18px 0}.hero p{font-size:10px;max-width:225px}.object-note{right:6vw;top:auto;bottom:145px;width:155px;padding:10px 0}.object-note h2{font-size:20px}.object-note p{font-size:9px}.thumbs{right:6vw;bottom:72px}.thumb{width:42px;height:42px}.bottom{left:6vw;right:6vw;bottom:16px}.caption{max-width:110px;line-height:1.8}.hint{display:none}.credit{display:none}.panel{top:auto;bottom:72px;left:5vw;right:5vw;width:auto;transform:translateY(15px);padding:19px}.panel.open{transform:translateY(0)}.scene-switch{top:75px;max-width:95vw}.scene-switch button{padding:8px 10px;font-size:7px}.status{top:75px}.memory{padding:23px}}
-
-.explore-hud{position:fixed;z-index:5;left:50%;top:96px;transform:translateX(-50%);display:flex;align-items:center;gap:16px;padding:10px 15px;border:1px solid #c7a57745;background:#211b16cf;backdrop-filter:blur(12px);white-space:nowrap}
-.explore-hud .label{font:8px var(--mono);letter-spacing:.15em;color:#c9a77b}.explore-hud .count{font:16px var(--serif);color:#f0dfc5}.explore-hud .dots{display:flex;gap:5px}.explore-hud .dots i{display:block;width:7px;height:7px;border:1px solid #a98b65;border-radius:50%}.explore-hud .dots i.found{background:#d6ad72;box-shadow:0 0 8px #d6ad72}
-#lookHint{position:fixed;z-index:4;left:50%;bottom:92px;transform:translateX(-50%);font:8px var(--mono);letter-spacing:.13em;color:#d4c0a1;text-shadow:0 2px 8px #000;pointer-events:none;opacity:.8}
-#objectNote{cursor:pointer}.object-note:after{content:"CLICK THE OBJECT IN THE ROOM";display:block;margin-top:10px;font:7px var(--mono);letter-spacing:.12em;color:#8f795e}
-#world canvas{cursor:grab}#world canvas:active{cursor:grabbing}
-@media(max-width:760px){.explore-hud{top:76px;gap:10px;padding:8px 11px}.explore-hud .label{font-size:7px}#lookHint{bottom:126px;font-size:7px}}
+:root{--paper:#d8cbb3;--dim:#958875;--gold:#b58e5c;--mono:'DM Mono',monospace;--serif:'Cormorant Garamond',serif}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#171613;color:var(--paper)}
+body{font-family:var(--serif);cursor:crosshair}#world{position:fixed;inset:0}canvas{display:block;width:100%;height:100%;touch-action:none}
+#veil{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 51% 45%,transparent 25%,#08080735 68%,#080807d9 120%),linear-gradient(0deg,#0b0a08b8,transparent 27%,transparent 75%,#0b0a0870);z-index:2}
+#grain{position:fixed;inset:-50%;width:200%;height:200%;z-index:3;pointer-events:none;opacity:.075;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");animation:grain .22s steps(2) infinite}
+@keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-2%,1%)}50%{transform:translate(1%,-2%)}75%{transform:translate(2%,2%)}100%{transform:translate(-1%,-1%)}}
+#identity{position:fixed;z-index:5;left:34px;top:30px;display:flex;align-items:center;gap:12px;pointer-events:none}
+#sigil{width:27px;height:27px;border:1px solid #b9956b;border-radius:50%;display:grid;place-items:center;font:11px var(--serif);color:#d2b58e}
+#identity span{font:8px var(--mono);letter-spacing:.22em;color:#d4c5ac}
+#coordinate{position:fixed;z-index:5;right:34px;top:34px;text-align:right;font:8px/1.9 var(--mono);letter-spacing:.15em;color:#aa9b83;pointer-events:none}
+#coordinate b{display:block;font-weight:400;color:#dfc9a6}
+#objectTitle{position:fixed;z-index:5;left:7vw;bottom:11vh;pointer-events:none;transition:opacity .5s,transform .5s}
+#objectTitle .eyebrow{font:8px var(--mono);letter-spacing:.22em;color:#c39a68}
+#objectTitle h1{font:400 clamp(44px,7vw,100px)/.86 var(--serif);letter-spacing:-.035em;margin:15px 0 9px;color:#e8ddc9;text-shadow:0 4px 30px #0008}
+#objectTitle p{font:10px/1.9 'Noto Serif SC',serif;letter-spacing:.08em;color:#b5a58c;margin:0}
+#objectTitle.hidden{opacity:0;transform:translateY(14px)}
+#prompt{position:fixed;z-index:5;left:50%;bottom:32px;transform:translateX(-50%);font:8px var(--mono);letter-spacing:.18em;color:#a99b84;white-space:nowrap;pointer-events:none}
+#prompt i{font-style:normal;color:#d1ad7d;margin:0 9px}
+#progress{position:fixed;z-index:5;right:35px;bottom:35px;display:flex;gap:8px;align-items:center}
+#progress button{width:5px;height:5px;padding:0;border:0;border-radius:50%;background:#756957;cursor:pointer;transition:.3s}
+#progress button.active{width:24px;border-radius:5px;background:#d0ae7e}
+#inspect{position:fixed;z-index:8;inset:0;display:grid;place-items:center;background:#090806a8;backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .4s}
+#inspect.open{opacity:1;pointer-events:auto}
+#paper{position:relative;width:min(570px,86vw);padding:clamp(28px,5vw,58px);background:#d8cbb2;color:#282219;box-shadow:0 30px 100px #000b;transform:translateY(18px) rotate(-1deg);transition:transform .5s}
+#inspect.open #paper{transform:translateY(0) rotate(-1deg)}
+#paper:before{content:"";position:absolute;inset:12px;border:1px solid #6f5c4238;pointer-events:none}
+#paper .stamp{font:8px var(--mono);letter-spacing:.2em;color:#806746}
+#paper h2{font:500 clamp(35px,6vw,58px)/.95 var(--serif);margin:25px 0 15px}
+#paper p{font:12px/2.2 'Noto Serif SC',serif;color:#514638;max-width:430px}
+#paper .meta{display:flex;gap:28px;margin-top:28px;padding-top:18px;border-top:1px solid #76634855;font:8px/1.8 var(--mono);letter-spacing:.1em;color:#79674e}
+#close{position:absolute;right:27px;top:25px;border:0;background:none;color:#493b2a;font:22px var(--serif);cursor:pointer}
+#inspectHint{position:fixed;z-index:6;left:50%;top:50%;transform:translate(-50%,-50%);font:8px var(--mono);letter-spacing:.2em;color:#e3c89f;opacity:0;pointer-events:none;text-shadow:0 2px 12px #000;transition:opacity .2s}
+#inspectHint.show{opacity:1}
+#fade{position:fixed;z-index:10;inset:0;background:#12100d;pointer-events:none;opacity:0;transition:opacity .55s}
+#fade.on{opacity:1}
+@media(max-width:700px){#identity{left:18px;top:18px}#coordinate{right:18px;top:18px;font-size:7px}#objectTitle{left:7vw;bottom:14vh}#objectTitle h1{font-size:54px}#prompt{bottom:24px;font-size:7px;letter-spacing:.1em}#progress{right:18px;bottom:56px}#paper{padding:34px 28px}#paper .meta{gap:13px;flex-wrap:wrap}}
 </style>
-<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js"}}</script>
 </head>
 <body>
-<div id="stage"><div id="world"></div><div class="shade"></div></div>
-<header><div class="brand"><span class="brandmark"></span><span>SECOND<br>LIFE</span></div><nav class="topnav"><button class="active" data-mode="archive">THE WAREHOUSE</button><button data-mode="restore">RESTORATION</button><button data-mode="home">ANOTHER HOME</button><button data-mode="memory">OBJECT STORIES</button></nav><button class="save" id="saved">☆ &nbsp; SAVED <span id="savedCount">0</span></button></header>
-<section class="hero" id="hero"><div class="eyebrow">THE FORGOTTEN FURNITURE WAREHOUSE</div><h1>Time leaves<br><span>beautiful</span><br>marks.</h1><p>一座被时间遗忘的古董家具仓库。旧木、旧皮革与氧化的黄铜，在这里等待下一段人生。</p><div class="enter"><i>↘</i> ENTER THE WAREHOUSE</div></section>
-<aside class="object-note" id="objectNote"><div class="number" id="itemNumber">ARCHIVE 001 / 003</div><h2 id="itemName">The Heirloom Chair</h2><p id="itemDesc">Walnut · worn leather · c. 1890</p><button id="details">READ ITS HISTORY ↗</button></aside>
-<div class="loading" id="loading">OPENING THE OLD WAREHOUSE · DUST IN THE SUNLIGHT</div><div class="status" id="status">DRAG TO LOOK AROUND · CLICK AN OBJECT TO DISCOVER IT</div>
-<div class="explore-hud"><span class="label">THREE STORIES ARE WAITING</span><span class="count" id="foundCount">0 / 3</span><span class="dots"><i></i><i></i><i></i></span></div><div id="lookHint">MOVE YOUR CURSOR THROUGH THE ROOM · FOLLOW THE LIGHT</div>
-<div class="scene-switch" id="sceneSwitch"><button class="active" data-room="warehouse">WAREHOUSE</button><button data-room="workshop">RESTORATION ROOM</button><button data-room="attic">THE ATTIC</button></div>
-<aside class="panel" id="panel"><button class="close" id="close">×</button><div class="eyebrow" id="panelNo">ARCHIVE / 001</div><h3 id="panelName">The Heirloom Chair</h3><p id="panelStory"></p><div class="facts"><div class="fact"><span>PERIOD</span><span id="period">LATE VICTORIAN</span></div><div class="fact"><span>MATERIAL</span><span id="material">WALNUT · LEATHER</span></div><div class="fact"><span>CONDITION</span><span id="condition">AGED · UNRESTORED</span></div><div class="fact"><span>PROVENANCE</span><span id="dimensions">EST. 1890</span></div></div><button class="action" id="enquire">ASK ABOUT THIS HEIRLOOM ↗</button></aside>
-<aside class="memory" id="memory"><div class="eyebrow">THE OBJECTS REMEMBER</div><h3>Nothing here is truly forgotten.</h3><p>它们曾在餐桌旁等待家人，在壁炉边陪伴漫长冬夜，也曾被搬进阁楼、遗忘在仓库。我们保留时间留下的痕迹，而不是把它们擦掉。</p><button id="memoryClose">RETURN TO THE WAREHOUSE ×</button></aside>
-<div class="thumbs"><button class="thumb active" data-index="0">01</button><button class="thumb" data-index="1">02</button><button class="thumb" data-index="2">03</button></div>
-<div class="bottom"><div class="caption">COLLECTED BY TIME · KEPT FOR TOMORROW<br><span style="color:#806e59">EUROPEAN FURNITURE ARCHIVE / NO. 001</span></div><div class="controls"><div class="hint">DRAG TO ORBIT<br>SCROLL TO APPROACH</div><div class="arrows"><button id="prev" aria-label="Previous object">‹</button><button id="next" aria-label="Next object">›</button></div></div></div>
-<div class="credit">A DIGITAL ANTIQUE ARCHIVE · 3D INTERPRETATIONS</div>
+<div id="world"></div><div id="veil"></div><div id="grain"></div>
+<div id="identity"><div id="sigil">S</div><span>SECOND LIFE<br>OBJECTS OUTLIVE US</span></div>
+<div id="coordinate"><b id="coordNo">01 / 03</b><span id="coordType">FOUND IN THE WAREHOUSE</span></div>
+<div id="objectTitle"><div class="eyebrow" id="titleEyebrow">ARCHIVE NO. 001 · c. 1890</div><h1 id="titleName">The Heirloom<br>Chair</h1><p id="titleDesc">一把椅子，记得比人更久。</p></div>
+<div id="prompt"><i>SCROLL</i> MOVE THROUGH TIME <i>·</i> CLICK TO TOUCH THE OBJECT</div>
+<div id="progress"><button class="active" data-index="0" aria-label="Object 1"></button><button data-index="1" aria-label="Object 2"></button><button data-index="2" aria-label="Object 3"></button></div>
+<div id="inspect"><div id="paper"><button id="close" aria-label="Close">×</button><div class="stamp" id="paperStamp">OBJECT RECORD / 001</div><h2 id="paperTitle">The Heirloom Chair</h2><p id="paperStory"></p><div class="meta"><span id="paperPeriod">1890 · VICTORIAN</span><span id="paperMaterial">WALNUT / LEATHER</span><span>UNRESTORED</span></div></div></div>
+<div id="inspectHint">CLICK TO OPEN THE OBJECT RECORD</div><div id="fade"></div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js"}}</script>
 <script type="module">
 import * as THREE from 'three';
 const $=s=>document.querySelector(s);
-const scene=new THREE.Scene();scene.background=new THREE.Color('#211a14');scene.fog=new THREE.FogExp2('#211a14',.025);
-const camera=new THREE.PerspectiveCamera(39,innerWidth/innerHeight,.1,120);
-const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.18;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;$('#world').appendChild(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0xc9b18e,0x20150e,.75));
-const sun=new THREE.DirectionalLight(0xffd6a0,4.3);sun.position.set(-8,12,5);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-18;sun.shadow.camera.right=18;sun.shadow.camera.top=18;sun.shadow.camera.bottom=-18;sun.shadow.bias=-.0003;scene.add(sun);
-const warm=new THREE.PointLight(0xffb56b,65,18,2);warm.position.set(5,4,1);scene.add(warm);
-const fill=new THREE.DirectionalLight(0x8790a0,.65);fill.position.set(8,5,-8);scene.add(fill);
-const dustMat=new THREE.PointsMaterial({color:0xe8c998,size:.035,transparent:true,opacity:.5,depthWrite:false});
-const dustGeo=new THREE.BufferGeometry(),dustCount=750,dustPos=new Float32Array(dustCount*3);for(let i=0;i<dustCount;i++){dustPos[i*3]=(Math.random()-.5)*24;dustPos[i*3+1]=Math.random()*9;dustPos[i*3+2]=(Math.random()-.5)*23}dustGeo.setAttribute('position',new THREE.BufferAttribute(dustPos,3));const dust=new THREE.Points(dustGeo,dustMat);scene.add(dust);
-const mats={};
-function woodTexture(){const c=document.createElement('canvas');c.width=512;c.height=512;const x=c.getContext('2d');x.fillStyle='#50321e';x.fillRect(0,0,512,512);for(let i=0;i<1600;i++){const y=Math.random()*512;x.strokeStyle=['#1d120d','#785036','#9b7047','#302018'][Math.floor(Math.random()*4)];x.globalAlpha=Math.random()*.18;x.lineWidth=Math.random()*3+.3;x.beginPath();x.moveTo(0,y);x.bezierCurveTo(150,y+Math.random()*12-6,340,y+Math.random()*15-7,512,y+Math.random()*12-6);x.stroke()}for(let i=0;i<40;i++){x.globalAlpha=.12;x.fillStyle='#17100b';x.beginPath();x.ellipse(Math.random()*512,Math.random()*512,Math.random()*18+3,Math.random()*5+1,0,0,Math.PI*2);x.fill()}const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(1,1);t.colorSpace=THREE.SRGBColorSpace;return t}
-function leatherTexture(){const c=document.createElement('canvas');c.width=512;c.height=512;const x=c.getContext('2d');x.fillStyle='#3b2118';x.fillRect(0,0,512,512);for(let i=0;i<25000;i++){x.fillStyle=Math.random()>.5?'#9a6945':'#120c09';x.globalAlpha=Math.random()*.14;x.fillRect(Math.random()*512,Math.random()*512,Math.random()*3+.4,Math.random()*3+.4)}for(let i=0;i<55;i++){x.strokeStyle='#160e0b';x.globalAlpha=.18;x.lineWidth=1+Math.random()*2;x.beginPath();let a=Math.random()*512,b=Math.random()*512;x.moveTo(a,b);x.bezierCurveTo(a+30,b+10,a-25,b+25,a+Math.random()*80-40,b+Math.random()*60);x.stroke()}const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t}
-const woodMap=woodTexture(),leatherMap=leatherTexture();
-mats.wood=new THREE.MeshStandardMaterial({map:woodMap,color:'#80502f',roughness:.79,bumpMap:woodMap,bumpScale:.085});
-mats.darkWood=new THREE.MeshStandardMaterial({map:woodMap,color:'#4b2b19',roughness:.78,bumpMap:woodMap,bumpScale:.09});
-mats.leather=new THREE.MeshStandardMaterial({map:leatherMap,color:'#71402a',roughness:.94,bumpMap:leatherMap,bumpScale:.12});
-mats.brass=new THREE.MeshStandardMaterial({color:'#80603a',metalness:.72,roughness:.58});
-mats.iron=new THREE.MeshStandardMaterial({color:'#282522',metalness:.62,roughness:.82});
-mats.wall=new THREE.MeshStandardMaterial({color:'#554438',roughness:1});
-mats.plaster=new THREE.MeshStandardMaterial({color:'#75604b',roughness:1});
-mats.canvas=new THREE.MeshStandardMaterial({color:'#7a6651',roughness:1});
-function mesh(g,m,parent=scene,x=0,y=0,z=0){const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
-function box(parent,x,y,z,w,h,d,mat){return mesh(new THREE.BoxGeometry(w,h,d),mat,parent,x,y,z)}
-function cylinder(parent,x,y,z,r1,r2,h,mat,seg=16){return mesh(new THREE.CylinderGeometry(r1,r2,h,seg),mat,parent,x,y,z)}
-function sphere(parent,x,y,z,sx,sy,sz,mat){const o=mesh(new THREE.SphereGeometry(1,24,16),mat,parent,x,y,z);o.scale.set(sx,sy,sz);return o}
-function curveTube(parent,pts,r,mat){const curve=new THREE.CatmullRomCurve3(pts.map(p=>new THREE.Vector3(...p)));return mesh(new THREE.TubeGeometry(curve,48,r,8,false),mat,parent)}
-function latheLeg(parent,x,z,mat,flip=1){const pts=[[0,0],[.11,.03],[.14,.12],[.09,.22],[.055,.34],[.1,.45],[.075,.58],[.035,.7],[.03,.8]].map(([r,y])=>new THREE.Vector2(r,y*flip));const o=mesh(new THREE.LatheGeometry(pts,16),mat,parent,x,.12,z);o.rotation.z=flip<0?Math.PI:0;return o}
-function brassNail(parent,x,y,z){sphere(parent,x,y,z,.025,.025,.025,mats.brass)}
-function createVictorianChair(){const g=new THREE.Group();const dark=mats.darkWood,leather=mats.leather;
- // seat frame and sprung leather cushion
- box(g,0,1.18,0,1.38,.22,1.12,dark);const seat=sphere(g,0,1.34,.02,.66,.22,.53,leather);
- // seat piping
- const pipeMat=new THREE.MeshStandardMaterial({color:'#9a704a',roughness:.95});curveTube(g,[[-.61,1.39,-.4],[-.66,1.4,0],[-.6,1.39,.42],[0,1.4,.54],[.6,1.39,.42],[.66,1.4,0],[.61,1.39,-.4]],.018,pipeMat);
- // back: arched frame, upholstered back, carved top crest
- const back=sphere(g,0,2.2,-.48,.57,.91,.16,leather);back.rotation.z=0;
- curveTube(g,[[-.64,1.42,-.49],[-.69,2.15,-.49],[-.56,2.83,-.49],[-.28,3.02,-.49],[0,3.06,-.49],[.28,3.02,-.49],[.56,2.83,-.49],[.69,2.15,-.49],[.64,1.42,-.49]],.085,dark);
- curveTube(g,[[-.48,1.5,-.62],[-.5,2.2,-.64],[-.38,2.73,-.62],[0,2.87,-.62],[.38,2.73,-.62],[.5,2.2,-.64],[.48,1.5,-.62]],.022,mats.wood);
- // button tufting, diamond-like arranged
- for(let row=0;row<5;row++)for(let col=-2;col<=2;col++){const yy=1.72+row*.21+(Math.abs(col)%2)*.08,xx=col*.18;if(yy<2.78)sphere(g,xx,yy,-.646,.035,.035,.018,mats.brass)}
- // curved arms and turned supports
- for(const s of [-1,1]){curveTube(g,[[s*.55,1.38,.34],[s*.75,1.55,.22],[s*.78,1.83,-.03],[s*.7,1.96,-.31],[s*.57,1.9,-.5]],.075,dark);curveTube(g,[[s*.58,1.48,.29],[s*.68,1.65,.08],[s*.66,1.8,-.24]],.025,mats.wood);latheLeg(g,s*.57,.4,dark,1);latheLeg(g,s*.57,-.42,dark,1);sphere(g,s*.57,1.17,.4,.11,.11,.11,mats.wood)}
- // front apron with carved scallop
- box(g,0,1.03,.47,1.08,.18,.12,dark);curveTube(g,[[-.48,1.02,.55],[-.3,.91,.57],[0,.88,.58],[.3,.91,.57],[.48,1.02,.55]],.035,mats.wood);
- // worn edges, nail heads, small repaired patches
- for(let i=0;i<8;i++){brassNail(g,-.49+i*.14,1.38,.47);brassNail(g,-.49+i*.14,1.38,-.44)}
- for(let i=0;i<5;i++){curveTube(g,[[.18+i*.035,1.47,.52],[.2+i*.035,1.44,.54],[.23+i*.035,1.4,.52]],.006,mats.darkWood)}
- g.position.set(0,0,0);g.userData.name='Heirloom Chair';return g}
-function createAntiqueDresser(){const g=new THREE.Group(),d=mats.darkWood,w=mats.wood;box(g,0,1.35,0,1.55,1.75,.72,d);box(g,0,2.25,0,1.72,.16,.86,w);box(g,0,.48,0,1.72,.17,.86,d);
- for(let row=0;row<3;row++){const y=1.9-row*.53;box(g,0,y,.38,1.4,.43,.09,w);for(let x of [-.42,.42]){cylinder(g,x,y,.45,.055,.055,.045,mats.brass,12);sphere(g,x,y,.49,.055,.055,.055,mats.brass)}}
- for(let s of [-1,1]){latheLeg(g,s*.63,.29,d,1);latheLeg(g,s*.63,-.29,d,1)}
- box(g,0,2.38,0,1.68,.12,.82,d);for(let i=0;i<5;i++){const x=-.6+i*.3;curveTube(g,[[x,2.4,.39],[x+.02,2.48,.4],[x,2.52,.38]],.018,w)}
- // damaged veneer panels and worm holes
- for(let i=0;i<12;i++){const x=(Math.random()-.5)*1.25,y=.7+Math.random()*1.4;sphere(g,x,y,.431,.012,.009,.006,mats.iron)}
- g.position.set(0,0,0);return g}
-function createWorkTable(){const g=new THREE.Group(),d=mats.darkWood;box(g,0,1.28,0,2.1,.2,1.05,d);box(g,0,1.39,0,2.14,.06,1.08,mats.wood);for(let x of [-.83,.83])for(let z of [-.37,.37]){latheLeg(g,x,z,d,1);box(g,x,.88,z,.13,.5,.13,d)}
- // drawers and old brass pulls
- for(let x of [-.55,0,.55]){box(g,x,1.05,.55,.48,.3,.08,mats.wood);sphere(g,x,1.05,.62,.05,.05,.035,mats.brass)}
- // old newspaper, tool tray, hammer and chisel
- const paper=new THREE.MeshStandardMaterial({color:'#b7a17d',roughness:1});const pg=box(g,-.35,1.47,-.12,.75,.015,.48,paper);pg.rotation.y=-.15;
- box(g,.42,1.48,-.1,.42,.045,.24,mats.iron);curveTube(g,[[.25,1.51,-.1],[.15,1.67,-.1],[-.04,1.82,-.1]],.035,mats.wood);
- g.position.set(-3.5,0,-2.3);return g}
-function createCrate(x,y,z,s=1){const g=new THREE.Group(),d=mats.wood;box(g,0,.38,0,1.1,.76,.9,d);for(let i=0;i<4;i++){box(g,-.42+i*.28,.39,.47,.045,.72,.04,mats.darkWood);box(g,-.42+i*.28,.39,-.47,.045,.72,.04,mats.darkWood)}for(let y2 of [.08,.7]){box(g,0,y2,.49,1.12,.07,.05,d);box(g,0,y2,-.49,1.12,.07,.05,d)}g.position.set(x,y,z);g.scale.setScalar(s);g.rotation.y=(Math.random()-.5)*.4;return g}
-function createWindow(x,y,z,w,h){const g=new THREE.Group(),iron=mats.iron;box(g,x,y,z,w,h,.15,mats.iron);box(g,x,y,z+.09,w-.13,h-.13,.02,new THREE.MeshBasicMaterial({color:'#d2a66b',transparent:true,opacity:.12}));for(let i=1;i<4;i++)box(g,x-w/2+i*w/4,y,z+.15,.035,h,.08,iron);for(let i=1;i<3;i++)box(g,x,y-h/2+i*h/3,z+.15,w,.035,.08,iron); // chipped stone frame
- box(g,x-w/2-.12,y,z,.2,h+.3,.26,mats.plaster);box(g,x+w/2+.12,y,z,.2,h+.3,.26,mats.plaster);box(g,x,y+h/2+.12,z,w+.42,.22,.26,mats.plaster)}
-// warehouse architecture: brick/plaster walls, timber beams, arched industrial windows
-const warehouse=new THREE.Group();scene.add(warehouse);
-const back=box(warehouse,0,5,-10,30,11,.6,mats.wall);back.material=mats.wall;
-for(let i=0;i<9;i++){box(warehouse,-13+i*3.25,5,-9.55,.16,10,.25,mats.darkWood)}
-for(let i=0;i<7;i++){const x=-11+i*3.65;box(warehouse,x,9.5,-9.5,.18,.35,.4,mats.iron)}
-// exposed roof trusses
-for(let x of [-10,-5,0,5,10]){curveTube(warehouse,[[x-2,10,-8],[x,7.4,-8],[x+2,10,-8]],.13,mats.darkWood);box(warehouse,x,10,-8,.2,.2,18,mats.iron)}
-createWindow(-6,6,-9.15,3.1,5.2);createWindow(-1.5,6,-9.15,3.1,5.2);createWindow(3,6,-9.15,3.1,5.2);
-const floorMat=new THREE.MeshStandardMaterial({color:'#514034',roughness:1});const floor=mesh(new THREE.PlaneGeometry(50,40),floorMat,warehouse,0,-.08,-1);floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;
-for(let i=0;i<22;i++){const plank=box(warehouse,-11+(i%11)*2.2,-.025,-8+Math.floor(i/11)*15,2.1,.035,14,new THREE.MeshStandardMaterial({color:i%3===0?'#30241b':i%3===1?'#66503b':'#493729',roughness:.98}));plank.receiveShadow=true}
-for(let x of [-8,-4,4,8]){box(warehouse,x,3,-1,.28,6,.35,mats.darkWood);box(warehouse,x,6.1,-1,.48,.25,.5,mats.iron)}
-// broad shafts of sunlight, translucent planes angled from window to floor
-const beamMat=new THREE.MeshBasicMaterial({color:0xffd69a,transparent:true,opacity:.055,depthWrite:false,side:THREE.DoubleSide});
-for(let i=0;i<4;i++){const b=mesh(new THREE.PlaneGeometry(2.3,10),beamMat,warehouse,-6+i*2.8,3.6,-1.2);b.rotation.y=-.48;b.rotation.x=.18}
-const floorDust=new THREE.Mesh(new THREE.PlaneGeometry(22,12),new THREE.MeshBasicMaterial({color:0xb88d5a,transparent:true,opacity:.055,depthWrite:false}));floorDust.rotation.x=-Math.PI/2;floorDust.position.set(-3,.01,-1);warehouse.add(floorDust);
-// shelves, crates, discarded drawer fronts, antique mirror frame
-for(let x of [-11,10]){for(let y of [1.8,3.8,5.8]){box(warehouse,x,y,-3,2.4,.16,.9,mats.darkWood);for(let j=0;j<3;j++)warehouse.add(createCrate(x-0.65+j*.65,y+.45,-3.1,.45))}}
-for(let i=0;i<5;i++){const c=createCrate(-7+i*.9,.02,3.5+(i%2)*.5,.85);warehouse.add(c)}
-const mirrorFrame=mesh(new THREE.BoxGeometry(1.45,2.2,.14),mats.wood,warehouse,8,2.1,2);const mirror=mesh(new THREE.PlaneGeometry(1.1,1.8),new THREE.MeshStandardMaterial({color:'#5d5a4f',metalness:.38,roughness:.32}),warehouse,8,2.1,1.91);
-for(let i=0;i<6;i++){const paper=box(warehouse,-5+i*.42,.03,1.6,.38,.015,.5,new THREE.MeshStandardMaterial({color:i%2?'#bca77f':'#8c795d',roughness:1}));paper.rotation.y=(Math.random()-.5)*.3}
-const chair=createVictorianChair(),dresser=createAntiqueDresser(),table=createWorkTable();const objects=[chair,dresser,table];
-chair.position.set(-3.15,.02,-.15);chair.scale.setScalar(.86);chair.rotation.y=.18;
-dresser.position.set(.15,.02,-2.15);dresser.scale.setScalar(.9);dresser.rotation.y=-.08;
-table.position.set(3.35,.02,-.15);table.scale.setScalar(.82);table.rotation.y=-.22;
-objects.forEach((o,i)=>{o.userData.archiveIndex=i;o.traverse(n=>{n.userData.archiveIndex=i})});
-const discovered=new Set();
-function addDiscoveryRing(x,z){const ring=mesh(new THREE.RingGeometry(.66,.69,64),new THREE.MeshBasicMaterial({color:0xb9905d,transparent:true,opacity:.58,side:THREE.DoubleSide}),scene,x,.025,z);ring.rotation.x=-Math.PI/2;return ring}
-const rings=[addDiscoveryRing(-3.15,-.15),addDiscoveryRing(.15,-2.15),addDiscoveryRing(3.35,-.15)];
-const markers=objects.map((o,i)=>{const light=new THREE.PointLight(0xd4a86d,5,2.5,2);light.position.set(o.position.x,2.5,o.position.z);scene.add(light);return light});
-const objectMeta=[
- {name:'The Heirloom Chair',subtitle:'Walnut · cracked leather · c. 1890',story:'这把维多利亚晚期扶手椅曾经属于一座乡间宅邸。深胡桃木扶手被手掌磨出温润的弧度，皮革在日光下显出细密裂纹，靠背的黄铜钉仍留在原来的位置。它没有被翻新成崭新的样子——修复只会稳固结构，留下岁月。',period:'LATE VICTORIAN · c.1890',material:'WALNUT · AGED LEATHER',condition:'AGED · STRUCTURALLY SOUND',origin:'ENGLISH COUNTRY HOUSE'},
- {name:'The Forgotten Dresser',subtitle:'Dark oak · oxidised brass · c. 1910',story:'一只来自老宅阁楼的橡木抽屉柜。抽屉边缘有长期摩擦留下的浅色木纹，黄铜拉手已经暗沉，侧板上仍可见旧漆与虫蛀留下的小孔。它的抽屉曾装着信件、照片和一些没人再记得的日常。',period:'EDWARDIAN · c.1910',material:'AGED OAK · OXIDISED BRASS',condition:'UNRESTORED · VENEER LOSS',origin:'NORMANDY FARMHOUSE'},
- {name:'The Restorer’s Bench',subtitle:'Elm · iron · old workshop tools',story:'这张老榆木工作台并非展品，而是修复师每天工作的地方。桌面留下刀痕、胶渍、木屑与深浅不一的旧漆。锤子和凿子被放在手边，下一件家具正在等待修复。',period:'WORKSHOP · EARLY 20TH C.',material:'ELM · WROUGHT IRON',condition:'WORKING SURFACE · WORN',origin:'ANTIQUE RESTORATION STUDIO'}
+const scene=new THREE.Scene();scene.background=new THREE.Color('#171613');scene.fog=new THREE.FogExp2('#171613',.027);
+const camera=new THREE.PerspectiveCamera(43,innerWidth/innerHeight,.1,100);camera.position.set(0,3.2,9);
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.2;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;$('#world').appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xb9a78d,0x17120d,.85));
+const key=new THREE.DirectionalLight(0xffd5a1,4.4);key.position.set(-5,10,5);key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.camera.left=-12;key.shadow.camera.right=12;key.shadow.camera.top=12;key.shadow.camera.bottom=-12;scene.add(key);
+const fill=new THREE.DirectionalLight(0x84909a,.7);fill.position.set(7,4,-6);scene.add(fill);
+const spot=new THREE.SpotLight(0xffd6a5,85,24,.42,.7,1.5);spot.position.set(-2,8,4);spot.target.position.set(0,1,0);scene.add(spot,spot.target);
+function mat(color,rough=.8,metal=0){return new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal})}
+const wood=mat('#4a2d1b',.72),wood2=mat('#68462b',.7),darkWood=mat('#291b13',.82),leather=mat('#38251e',.94),leather2=mat('#5a3b2c',.9),brass=mat('#927044',.45,.72),dustMat=new THREE.PointsMaterial({color:0xd8bd91,size:.035,transparent:true,opacity:.55,depthWrite:false});
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(50,50),mat('#29251f',.98));floor.rotation.x=-Math.PI/2;floor.position.y=-.03;floor.receiveShadow=true;scene.add(floor);
+const back=new THREE.Mesh(new THREE.PlaneGeometry(30,13),mat('#25211b',1));back.position.set(0,6,-8);back.receiveShadow=true;scene.add(back);
+for(let x=-12;x<=12;x+=4){const beam=new THREE.Mesh(new THREE.BoxGeometry(.18,.2,17),darkWood);beam.position.set(x,7.5,-.2);beam.rotation.x=.1;beam.castShadow=true;scene.add(beam)}
+for(let z=-6;z<=5;z+=3){const seam=new THREE.Mesh(new THREE.BoxGeometry(30,.02,.035),mat('#171512'));seam.position.set(0,.01,z);scene.add(seam)}
+const dustGeo=new THREE.BufferGeometry(),dustN=850,dustP=new Float32Array(dustN*3);for(let i=0;i<dustN;i++){dustP[i*3]=(Math.random()-.5)*20;dustP[i*3+1]=Math.random()*7;dustP[i*3+2]=(Math.random()-.5)*17-1}dustGeo.setAttribute('position',new THREE.BufferAttribute(dustP,3));const dust=new THREE.Points(dustGeo,dustMat);scene.add(dust);
+const objects=[];
+function box(parent,w,h,d,material,x,y,z,rx=0,ry=0,rz=0){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);m.position.set(x,y,z);m.rotation.set(rx,ry,rz);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m}
+function lathe(parent,pts,material,x,y,z){const m=new THREE.Mesh(new THREE.LatheGeometry(pts.map(p=>new THREE.Vector2(p[0],p[1])),12),material);m.position.set(x,y,z);m.castShadow=true;parent.add(m);return m}
+function makeChair(){const g=new THREE.Group();g.position.set(0,0,0);
+for(const x of [-.72,.72])for(const z of [-.62,.62]){lathe(g,[[.11,0],[.095,.18],[.07,.55],[.1,.8],[.12,.86]],wood,x,.02,z);box(g,.19,.1,.18,wood,x,.75,z)}
+box(g,1.55,.22,1.42,wood2,0,.92,0);const seat=new THREE.Mesh(new THREE.BoxGeometry(1.38,.2,1.23,8,2,8),leather);seat.position.set(0,1.09,0);seat.castShadow=true;g.add(seat);
+for(let x=-.48;x<=.49;x+=.32)for(let z=-.42;z<=.43;z+=.28){const b=new THREE.Mesh(new THREE.SphereGeometry(.035,10,8),brass);b.position.set(x,1.2,z);g.add(b)}
+for(const x of [-.69,.69]){box(g,.13,1.05,.14,wood,x,1.52,-.61);box(g,.13,.95,.14,wood,x,1.47,.61);box(g,.16,.12,1.35,wood2,x,2.02,0);const arm=new THREE.Mesh(new THREE.CylinderGeometry(.09,.13,1.28,12),wood2);arm.rotation.x=Math.PI/2;arm.position.set(x,1.7,0);arm.castShadow=true;g.add(arm)}
+box(g,1.25,1.12,.16,wood2,0,1.72,-.65);const backPad=box(g,1.08,.88,.12,leather2,0,1.76,-.75);backPad.rotation.x=-.05;
+for(let x=-.38;x<=.39;x+=.25)for(let y=1.48;y<=2.03;y+=.24){const b=new THREE.Mesh(new THREE.SphereGeometry(.035,10,8),brass);b.position.set(x,y,-.675);g.add(b)}
+return g}
+function makeCabinet(){const g=new THREE.Group();g.position.set(0,0,0);box(g,2.4,2.8,.85,wood,0,1.55,0);box(g,2.5,.16,.98,wood2,0,3.02,0);box(g,2.55,.13,1.02,darkWood,0,.12,0);
+for(const x of [-.83,0,.83]){box(g,.72,.78,.08,wood2,x,2.28,-.46);box(g,.72,.78,.08,wood2,x,1.35,-.46);for(const y of [2.28,1.35]){const k=new THREE.Mesh(new THREE.SphereGeometry(.07,12,10),brass);k.position.set(x,y,-.54);g.add(k)}}
+for(const x of [-.95,.95])box(g,.12,.25,.12,darkWood,x,.1,.1);
+return g}
+function makeDesk(){const g=new THREE.Group();box(g,2.7,.2,1.35,wood2,0,1.62,0);for(const x of [-1.08,1.08]){box(g,.55,1.55,1.05,wood,x,.82,0);for(let y=.45;y<1.45;y+=.42){box(g,.48,.3,.08,wood2,x,y,-.56);const k=new THREE.Mesh(new THREE.SphereGeometry(.045,10,8),brass);k.position.set(x,y,-.63);g.add(k)}}for(const x of [-1.15,1.15])for(const z of [-.5,.5])box(g,.12,.22,.12,darkWood,x,.12,z);box(g,2.3,.08,.1,darkWood,0,1.45,-.58);return g}
+const data=[
+{name:'The Heirloom\nChair',eyebrow:'ARCHIVE NO. 001 · c. 1890',desc:'一把椅子，记得比人更久。',period:'1890 · VICTORIAN',material:'WALNUT / LEATHER',story:'它曾经属于一位铁路工程师的书房。扶手被手掌磨得发亮，皮革上留下了漫长冬夜的褶皱。我们没有修补这些痕迹——它们就是这把椅子的履历。',make:makeChair},
+{name:'The Quiet\nKeeper',eyebrow:'ARCHIVE NO. 002 · c. 1912',desc:'抽屉里，时间没有被清空。',period:'1912 · EDWARDIAN',material:'DARK OAK / BRASS',story:'这只橡木柜在同一个家庭里待了三代。抽屉底部还留着铅笔写下的尺寸、旧信封的胶痕，以及一枚早已失去光泽的黄铜把手。',make:makeCabinet},
+{name:'The Maker’s\nTable',eyebrow:'ARCHIVE NO. 003 · c. 1930',desc:'每一道划痕，都是一次制作。',period:'1930 · WORKSHOP',material:'OAK / IRON',story:'它不是被陈列的家具，而是一张真正工作过的桌子。刀痕、墨迹和被锤子击出的浅坑仍在桌面上。上一位主人离开时，最后一件作品还没有完成。',make:makeDesk}
 ];
-let active=0,current=objects[0],sceneMode='archive',room='warehouse',yaw=0,targetYaw=0,pitch=-.12,targetPitch=-.12,distance=11.5,targetDistance=11.5,dragging=false,lastX=0,lastY=0,down=null,saved=new Set(),autoRotate=false;
-objects.forEach(o=>scene.add(o));
-function showObject(i){current=objects[i];targetYaw=(i-1)*.17;targetPitch=-.1;targetDistance=11.5;renderInfo();$('#loading').classList.add('done')}
-function renderInfo(){const m=objectMeta[active];$('#itemNumber').textContent='ARCHIVE 00'+(active+1)+' / 003';$('#itemName').textContent=m.name;$('#itemDesc').textContent=m.subtitle;$('#panelNo').textContent='ARCHIVE / 00'+(active+1);$('#panelName').textContent=m.name;$('#panelStory').textContent=m.story;$('#period').textContent=m.period;$('#material').textContent=m.material;$('#condition').textContent=m.condition;$('#dimensions').textContent=m.origin;document.querySelectorAll('.thumb').forEach(b=>b.classList.toggle('active',+b.dataset.index===active))}
-function updateDiscovery(){const n=discovered.size;$('#foundCount').textContent=n+' / 3';document.querySelectorAll('.explore-hud .dots i').forEach((el,i)=>el.classList.toggle('found',discovered.has(i)));if(n===3)status('ALL STORIES FOUND · THE WAREHOUSE REMEMBERS')}
-
-function activate(i){active=(i+objects.length)%objects.length;showObject(active);if(!discovered.has(active)){discovered.add(active);updateDiscovery()}openPanel()}
-function status(t){const e=$('#status');e.textContent=t;e.classList.add('show');clearTimeout(status.timer);status.timer=setTimeout(()=>e.classList.remove('show'),2500)}
-function openPanel(){$('#panel').classList.add('open');$('#hero').classList.add('hide');$('#objectNote').classList.add('hide');autoRotate=false}
-function closePanel(){$('#panel').classList.remove('open');$('#hero').classList.remove('hide');$('#objectNote').classList.remove('hide');autoRotate=true}
-$('#details').onclick=openPanel;$('#close').onclick=closePanel;$('#prev').onclick=()=>activate(active-1);$('#next').onclick=()=>activate(active+1);document.querySelectorAll('.thumb').forEach(b=>b.onclick=()=>activate(+b.dataset.index));$('#enquire').onclick=()=>{const m=objectMeta[active];location.href='mailto:?subject='+encodeURIComponent('SECOND LIFE · '+m.name)+'&body='+encodeURIComponent('I would like to enquire about '+m.name+'.')};
-$('#saved').onclick=()=>{if(saved.has(active)){saved.delete(active);status('REMOVED FROM YOUR COLLECTION')}else{saved.add(active);status('ADDED TO YOUR COLLECTION')}$('#savedCount').textContent=saved.size};
-function setMode(mode){sceneMode=mode;document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));$('#sceneSwitch').classList.toggle('show',mode==='home');$('#memory').classList.toggle('open',mode==='memory');$('#panel').classList.remove('open');if(mode==='archive'){warehouse.visible=true;targetDistance=8.5;$('#hero').classList.remove('hide');$('#objectNote').classList.remove('hide');autoRotate=true;status('THE WAREHOUSE · TAKE YOUR TIME')}if(mode==='restore'){warehouse.visible=true;targetDistance=7;$('#hero').classList.add('hide');$('#objectNote').classList.remove('hide');autoRotate=false;status('RESTORATION ROOM · EXAMINE THE DETAILS')}if(mode==='home'){warehouse.visible=true;targetDistance=10;$('#hero').classList.add('hide');$('#objectNote').classList.remove('hide');autoRotate=false;status('A NEW HOME · FIND A PLACE FOR IT')}if(mode==='memory'){targetDistance=8.5;$('#hero').classList.add('hide');$('#objectNote').classList.add('hide');autoRotate=false}}
-document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));document.querySelectorAll('[data-room]').forEach(b=>b.onclick=()=>{room=b.dataset.room;document.querySelectorAll('[data-room]').forEach(x=>x.classList.toggle('active',x===b));status('SPACE · '+room.toUpperCase());targetDistance=room==='attic'?11:room==='workshop'?7:8.5});
-$('#memoryClose').onclick=()=>setMode('archive');
-const canvas=renderer.domElement,raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();let hovered=-1;
-function hitObject(e){const rect=canvas.getBoundingClientRect();pointer.x=((e.clientX-rect.left)/rect.width)*2-1;pointer.y=-((e.clientY-rect.top)/rect.height)*2+1;raycaster.setFromCamera(pointer,camera);const hits=raycaster.intersectObjects(objects,true);for(const hit of hits){let node=hit.object;while(node&&node.userData.archiveIndex===undefined)node=node.parent;if(node&&node.userData.archiveIndex!==undefined)return node.userData.archiveIndex}return -1}
-canvas.addEventListener('pointerdown',e=>{dragging=true;down={x:e.clientX,y:e.clientY};lastX=e.clientX;lastY=e.clientY;autoRotate=false;canvas.setPointerCapture(e.pointerId)});
-canvas.addEventListener('pointermove',e=>{if(!dragging){const h=hitObject(e);if(h!==hovered){hovered=h;canvas.style.cursor=h>=0?'pointer':'grab';if(h>=0){$('#lookHint').textContent='FOUND SOMETHING · CLICK TO EXAMINE';}else $('#lookHint').textContent='MOVE YOUR CURSOR THROUGH THE ROOM · FOLLOW THE LIGHT'}return}targetYaw-=(e.clientX-lastX)*.006;targetPitch=THREE.MathUtils.clamp(targetPitch+(e.clientY-lastY)*.004,-.5,.45);lastX=e.clientX;lastY=e.clientY});
-canvas.addEventListener('pointerup',e=>{if(!dragging)return;const moved=down?Math.hypot(e.clientX-down.x,e.clientY-down.y):0;dragging=false;if(moved<7){const hit=hitObject(e);if(hit>=0){active=hit;showObject(active);if(!discovered.has(active)){discovered.add(active);updateDiscovery();status('A STORY DISCOVERED · '+objectMeta[active].name.toUpperCase())}openPanel()}else status('NOTHING HERE IS NEW · LOOK CLOSER')}down=null});
-canvas.addEventListener('pointercancel',()=>dragging=false);canvas.addEventListener('wheel',e=>{targetDistance=THREE.MathUtils.clamp(targetDistance+e.deltaY*.008,7,18);autoRotate=false},{passive:true});
-camera.fov=46;camera.updateProjectionMatrix();camera.position.set(0,5.3,11.5);camera.lookAt(0,1.3,-.7);
-function animate(){requestAnimationFrame(animate);const t=performance.now()*.001;if(autoRotate&&!dragging&&sceneMode==='archive')targetYaw+=.00075;yaw+=(targetYaw-yaw)*.065;pitch+=(targetPitch-pitch)*.065;distance+=(targetDistance-distance)*.055;camera.position.set(Math.sin(yaw)*distance,3.6+Math.sin(pitch)*distance*.4,Math.cos(yaw)*distance-.7);camera.lookAt(0,1.25,-.7);rings.forEach((r,i)=>{r.material.opacity=.35+Math.sin(t*2+i)*.12;r.rotation.z=t*.08});markers.forEach((l,i)=>{l.intensity=3.5+Math.sin(t*2+i)*1.5});dust.rotation.y=t*.006;const p=dust.geometry.attributes.position;for(let i=0;i<dustCount;i++){p.array[i*3+1]+=.0012;if(p.array[i*3+1]>9)p.array[i*3+1]=0}p.needsUpdate=true;if(current&&active===0)current.position.y=Math.sin(t*.5)*.012;renderer.render(scene,camera)}
-renderInfo();updateDiscovery();$('#loading').classList.add('done');animate();status('EXPLORE THE ROOM · CLICK ANY FURNITURE TO UNCOVER ITS STORY');
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.7))});addEventListener('keydown',e=>{if(e.key==='Escape'){closePanel();setMode('archive')}if(e.key==='ArrowLeft')activate(active-1);if(e.key==='ArrowRight')activate(active+1)});
-</script></body></html>
+data.forEach((d,i)=>{const group=new THREE.Group();const model=d.make();model.scale.setScalar(i===0?1.05:i===1?.94:.96);group.add(model);group.position.set(0,0,0);scene.add(group);objects.push({group,model,data:d,index:i})});
+let current=0,targetYaw=0,yaw=0,targetX=0,focusX=0,drag=false,lastX=0,lastY=0,hover=-1,opened=false;
+const ray=new THREE.Raycaster(),pointer=new THREE.Vector2();
+function updateText(){const d=data[current];$('#coordNo').textContent=String(current+1).padStart(2,'0')+' / 03';$('#coordType').textContent=['FOUND IN THE WAREHOUSE','FOUND IN THE BACK ROOM','FOUND IN THE WORKSHOP'][current];$('#titleEyebrow').textContent=d.eyebrow;$('#titleName').innerHTML=d.name.replace('\n','<br>');$('#titleDesc').textContent=d.desc;document.querySelectorAll('#progress button').forEach((b,i)=>b.classList.toggle('active',i===current))}
+function moveTo(i){if(i===current)return;current=(i+3)%3;updateText();$('#fade').classList.add('on');setTimeout(()=>$('#fade').classList.remove('on'),160);$('#inspect').classList.remove('open');opened=false;targetYaw=0}
+function hit(e){const r=renderer.domElement.getBoundingClientRect();pointer.x=(e.clientX-r.left)/r.width*2-1;pointer.y=-((e.clientY-r.top)/r.height)*2+1;ray.setFromCamera(pointer,camera);const hits=ray.intersectObjects(objects[current].group.children,true);return hits.length?0:-1}
+renderer.domElement.addEventListener('pointermove',e=>{if(drag){targetYaw+=(e.clientX-lastX)*.004;lastX=e.clientX;lastY=e.clientY;return}const h=hit(e);hover=h;$('#inspectHint').classList.toggle('show',h>=0&&!opened)});
+renderer.domElement.addEventListener('pointerdown',e=>{drag=true;lastX=e.clientX;lastY=e.clientY;renderer.domElement.setPointerCapture(e.pointerId)});
+renderer.domElement.addEventListener('pointerup',e=>{if(!drag)return;drag=false;if(Math.abs(e.clientX-lastX)<4&&Math.abs(e.clientY-lastY)<4&&hover>=0)openRecord()});
+renderer.domElement.addEventListener('pointercancel',()=>drag=false);
+renderer.domElement.addEventListener('wheel',e=>{if(Math.abs(e.deltaY)>8)moveTo(current+(e.deltaY>0?1:-1))},{passive:true});
+window.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='PageDown')moveTo(current+1);if(e.key==='ArrowLeft'||e.key==='PageUp')moveTo(current-1);if(e.key==='Escape')closeRecord()});
+function openRecord(){const d=data[current];$('#paperStamp').textContent='OBJECT RECORD / 00'+(current+1);$('#paperTitle').textContent=d.name.replace('\n',' ');$('#paperStory').textContent=d.story;$('#paperPeriod').textContent=d.period;$('#paperMaterial').textContent=d.material;$('#inspect').classList.add('open');opened=true;$('#inspectHint').classList.remove('show')}
+function closeRecord(){$('#inspect').classList.remove('open');opened=false}
+$('#close').addEventListener('click',closeRecord);$('#inspect').addEventListener('click',e=>{if(e.target===$('#inspect'))closeRecord()});
+document.querySelectorAll('#progress button').forEach(b=>b.addEventListener('click',()=>moveTo(Number(b.dataset.index))));
+updateText();
+const clock=new THREE.Clock();
+function animate(){requestAnimationFrame(animate);const t=clock.getElapsedTime();yaw+=(targetYaw-yaw)*.055;camera.position.x=Math.sin(yaw)*9;camera.position.y=3.05+Math.sin(t*.25)*.035;camera.position.z=Math.cos(yaw)*9;camera.lookAt(0,1.25,0);objects.forEach((o,i)=>{o.group.rotation.y+=(i===current?Math.sin(t*.18)*.025:0);o.group.visible=i===current});spot.target.position.set(0,1.15,0);spot.position.x=-2+Math.sin(t*.16)*.4;dust.rotation.y=t*.008;renderer.render(scene,camera)}
+animate();
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+</script>
+</body></html>
