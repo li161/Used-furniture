@@ -1,65 +1,40 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#241b14"><title>旧物小店</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#211910}#scene{position:fixed;inset:0}canvas{display:block;width:100%;height:100%;touch-action:none}
-#vignette{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 44%,transparent 35%,#130e09a8 100%),linear-gradient(0deg,#130e09a0,transparent 28%);z-index:2}
-#dust{position:fixed;inset:0;pointer-events:none;z-index:3;opacity:.12;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-#sign{position:fixed;z-index:4;top:22px;left:26px;color:#e5d0ac;font:13px/1.8 serif;letter-spacing:.18em;text-shadow:0 2px 12px #000;pointer-events:none;opacity:.82}
-#sign small{display:block;font:10px/1.8 sans-serif;letter-spacing:.24em;color:#c6ad88}
-#hint{position:fixed;z-index:4;bottom:22px;left:50%;transform:translateX(-50%);white-space:nowrap;color:#dfc9a5a8;font:10px sans-serif;letter-spacing:.16em;text-shadow:0 2px 10px #000;pointer-events:none}
-@media(max-width:650px){#sign{top:16px;left:16px}#hint{bottom:15px;font-size:9px}}
-</style>
-<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js"}}</script></head>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#211910}#scene{position:fixed;inset:0}canvas{display:block;width:100%;height:100%;touch-action:none}#vignette{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 44%,transparent 35%,#130e09a8 100%),linear-gradient(0deg,#130e09a0,transparent 28%);z-index:2}#dust{position:fixed;inset:0;pointer-events:none;z-index:3;opacity:.1;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}#sign{position:fixed;z-index:4;top:22px;left:26px;color:#e5d0ac;font:13px/1.8 serif;letter-spacing:.18em;text-shadow:0 2px 12px #000;pointer-events:none;opacity:.82}#sign small{display:block;font:10px/1.8 sans-serif;letter-spacing:.24em;color:#c6ad88}#hint{position:fixed;z-index:4;bottom:22px;left:50%;transform:translateX(-50%);white-space:nowrap;color:#dfc9a5a8;font:10px sans-serif;letter-spacing:.16em;text-shadow:0 2px 10px #000;pointer-events:none}@media(max-width:650px){#sign{top:16px;left:16px}#hint{bottom:15px;font-size:9px}}
+</style><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"}}</script></head>
 <body><div id="scene"></div><div id="vignette"></div><div id="dust"></div><div id="sign">旧物小店<small>每件旧物，都有自己的来处</small></div><div id="hint">移动视线环顾店铺 · 滚动向里走 · 反向滚动回到门口</div>
 <script type="module">
 import * as THREE from 'three';
-const scene=new THREE.Scene();scene.background=new THREE.Color('#2a2118');scene.fog=new THREE.FogExp2('#2a2118',.021);
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+const scene=new THREE.Scene();scene.background=new THREE.Color('#2a2118');scene.fog=new THREE.FogExp2('#2a2118',.019);
 const camera=new THREE.PerspectiveCamera(61,innerWidth/innerHeight,.1,100);camera.position.set(0,2.35,10.5);
 const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.28;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;document.querySelector('#scene').appendChild(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0xe9c99b,0x21170f,1.1));
-const warm=new THREE.DirectionalLight(0xffd09a,3.3);warm.position.set(-5,9,5);warm.castShadow=true;warm.shadow.mapSize.set(2048,2048);scene.add(warm);
-function lamp(x,y,z,p=55){const l=new THREE.PointLight(0xffbd73,p,12,2);l.position.set(x,y,z);scene.add(l);const c=new THREE.Mesh(new THREE.SphereGeometry(.13,16,12),new THREE.MeshBasicMaterial({color:0xffd49a}));c.position.copy(l.position);scene.add(c)}
-lamp(-3.5,4.7,-1,65);lamp(2.8,4.8,-5,75);lamp(0,4.6,3,35);
-const mat=(c,r=.85,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
-const wood=mat('#65432a'),wood2=mat('#8a603b'),woodDark=mat('#38271b'),edge=mat('#a07a4d'),leather=mat('#53352b'),fabric=mat('#82705b'),fabric2=mat('#9b8870'),brass=mat('#a17b45',.4,.72),iron=mat('#292522',.55,.65),wall=mat('#594638'),dust=mat('#bca27e');
+scene.add(new THREE.HemisphereLight(0xe9c99b,0x21170f,1.2));const warm=new THREE.DirectionalLight(0xffd09a,3.5);warm.position.set(-5,9,5);warm.castShadow=true;warm.shadow.mapSize.set(2048,2048);scene.add(warm);
+function lamp(x,y,z,p=55){const l=new THREE.PointLight(0xffbd73,p,12,2);l.position.set(x,y,z);scene.add(l);const c=new THREE.Mesh(new THREE.SphereGeometry(.13,16,12),new THREE.MeshBasicMaterial({color:0xffd49a}));c.position.copy(l.position);scene.add(c)}lamp(-3.5,4.7,-1,65);lamp(2.8,4.8,-5,75);lamp(0,4.6,3,35);
+const mat=(c,r=.85)=>new THREE.MeshStandardMaterial({color:c,roughness:r});
 const floor=new THREE.Mesh(new THREE.PlaneGeometry(24,34),mat('#493727'));floor.rotation.x=-Math.PI/2;floor.position.set(0,-.12,-5);floor.receiveShadow=true;scene.add(floor);
-for(let z=10;z>-22;z-=1.1){const plank=new THREE.Mesh(new THREE.BoxGeometry(24,.035,1.06),mat(z%2? '#59432f':'#503b29'));plank.position.set(0,-.085,z-5);plank.receiveShadow=true;scene.add(plank)}
-const left=new THREE.Mesh(new THREE.PlaneGeometry(34,8),wall);left.rotation.y=Math.PI/2;left.position.set(-8,4,-5);scene.add(left);
-const right=new THREE.Mesh(new THREE.PlaneGeometry(34,8),wall);right.rotation.y=-Math.PI/2;right.position.set(8,4,-5);scene.add(right);
-const back=new THREE.Mesh(new THREE.PlaneGeometry(16,8),wall);back.position.set(0,4,-22);scene.add(back);
-const ceiling=new THREE.Mesh(new THREE.PlaneGeometry(16,34),mat('#30251b'));ceiling.rotation.x=Math.PI/2;ceiling.position.set(0,8,-5);scene.add(ceiling);
-function box(g,w,h,d,m,x,y,z){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;g.add(o);return o}
-function cyl(g,r1,r2,h,m,x,y,z,n=12){const o=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,n),m);o.position.set(x,y,z);o.castShadow=true;g.add(o);return o}
-function group(x,y,z,ry=0){const g=new THREE.Group();g.position.set(x,y,z);g.rotation.y=ry;scene.add(g);return g}
-function sofa(x,z,rot=0){const g=group(x,0,z,rot);box(g,2.8,.48,1.12,woodDark,0,.55,0);box(g,2.7,.65,.28,leather,0,1.05,-.43);box(g,2.5,.24,.86,fabric,0,.88,.08);for(const a of [-1.15,1.15]){box(g,.3,.86,1.1,leather,a,.92,.02);box(g,.28,.16,.95,wood2,a,.52,.02)}for(const a of [-1,1])for(const b of [-.38,.38])cyl(g,.055,.09,.42,woodDark,a,.22,b);for(let i=-1;i<=1;i++){const p=box(g,.72,.55,.18,fabric2,i*.83,1.1,-.36);p.rotation.z=(i*.035)}}
-function armchair(x,z,rot=0,color=leather){const g=group(x,0,z,rot);box(g,1.22,.25,1.15,wood2,0,.62,0);box(g,1.08,.2,.92,color,0,.82,.06);box(g,1.08,.85,.2,color,0,1.25,-.43);for(const a of [-.58,.58]){box(g,.18,.68,1.02,color,a,.94,0);cyl(g,.06,.085,.55,wood,a,.27,.4)}for(const a of [-.45,.45])cyl(g,.06,.09,.46,wood,a,.23,-.36)}
-function dresser(x,z,rot=0){const g=group(x,0,z,rot);box(g,1.8,1.9,.75,woodDark,0,1.08,0);box(g,1.94,.16,.88,wood2,0,2.08,0);box(g,1.9,.12,.84,wood,0,.13,0);for(let y=.58;y<1.8;y+=.59){box(g,1.62,.48,.08,wood2,0,y,-.4);box(g,1.48,.36,.025,wood,0,y,-.45);for(const x of [-.48,.48])cyl(g,.055,.07,.08,brass,x,y,-.51,12)}for(const x of [-.72,.72])cyl(g,.075,.11,.3,woodDark,x,.16,.2)}
-function diningTable(x,z,rot=0){const g=group(x,0,z,rot);box(g,2.5,.18,1.25,wood2,0,1.25,0);box(g,2.42,.08,1.17,edge,0,1.37,0);for(const x of [-1.05,1.05])for(const z of [-.45,.45]){box(g,.13,1.15,.13,woodDark,x,.62,z)}}
-function bookcase(x,z,rot=0){const g=group(x,0,z,rot);box(g,2.2,3.2,.5,woodDark,0,1.65,0);for(const y of [.35,1.15,1.95,2.75]){box(g,2.18,.12,.62,wood2,0,y,0);for(let i=0;i<9;i++){const h=.35+Math.random()*.35;const b=box(g,.12,h,.34,[wood,leather,mat('#6e4931'),mat('#9b7852'),mat('#4b4638')][i%5],-.92+i*.23,y+h/2,.02);b.rotation.z=(Math.random()-.5)*.08}}}
-function sideTable(x,z){const g=group(x,0,z);box(g,.9,.12,.8,wood2,0,.85,0);for(const a of [-.32,.32])for(const b of [-.27,.27])cyl(g,.045,.06,.82,woodDark,a,.4,b);cyl(g,.13,.16,.04,brass,0,.94,0)}
-function floorLamp(x,z){const g=group(x,0,z);cyl(g,.25,.3,.1,iron,0,.06,0);cyl(g,.035,.045,1.8,brass,0,.95,0);const shade=new THREE.Mesh(new THREE.CylinderGeometry(.38,.18,.48,20,1,true),fabric2);shade.position.y=1.95;g.add(shade);const l=new THREE.PointLight(0xffc982,16,5);l.position.set(x,1.9,z);scene.add(l)}
-function rug(x,z,w,d){const g=group(x,-.035,z);const r=new THREE.Mesh(new THREE.BoxGeometry(w,.035,d),mat('#744c35'));r.receiveShadow=true;g.add(r);const r2=new THREE.Mesh(new THREE.BoxGeometry(w-.18,.04,d-.18),mat('#a07a55'));r2.position.y=.025;g.add(r2);for(let i=-w/2;i<w/2;i+=.22){const f=box(g,.018,.02,.05,edge,i,.03,-d/2-.035)}}
-function plant(x,z){const g=group(x,0,z);cyl(g,.3,.23,.55,mat('#80543a'),0,.28,0,18);for(let i=0;i<9;i++){const a=i*Math.PI*2/9;const leaf=new THREE.Mesh(new THREE.SphereGeometry(.14,10,8),mat(i%2?'#4e5a36':'#657044'));leaf.scale.set(.45,1.7,.5);leaf.position.set(Math.cos(a)*.35,1.15+Math.random()*.45,Math.sin(a)*.35);leaf.rotation.z=Math.cos(a)*.65;g.add(leaf)}}
-function crate(x,z){const g=group(x,0,z);box(g,.9,.62,.72,wood,0,.32,0);for(let y=.12;y<.62;y+=.18)box(g,.94,.045,.76,wood2,0,y,0);for(const a of [-.35,.35])box(g,.08,.62,.08,woodDark,a,.32,-.37)}
-// 店铺深处的陈列墙
-bookcase(-4.9,-15,.02);dresser(0,-19);bookcase(4.9,-15,-.02);
-for(let x=-6.5;x<=6.5;x+=1.3){const beam=box(group(0,0,0),.06,.08,.06,woodDark,x,7.75,-5);}
-// 家具密集陈列：左右两侧、中央岛台、靠近入口的旧家具
-sofa(-4.6,1.5,.12);armchair(-2.5,2.8,-.25,'#73513c');sideTable(-1.15,2.7);floorLamp(-5.9,3.3);
-dresser(5.55,1.1,-.1);armchair(3.8,2.3,.28,'#594039');plant(6.7,3.8);
-rug(-.3,-.4,5.8,3.4);diningTable(-.25,-1.0,.05);armchair(-1.85,-2.35,.12,'#74614d');armchair(1.65,-2.45,-.1,'#5a4132');sideTable(2.8,-.5);
-sofa(4.5,-7,.25);armchair(2.5,-5.6,-.25,'#82644b');dresser(-5.7,-7,.12);diningTable(-2.6,-9,.2);bookcase(5.7,-11,0);floorLamp(4.3,-4.7);plant(-6.7,-3.6);plant(6.7,-9.4);rug(0,-8,5,3.4);
-for(let i=0;i<7;i++){const x=-5.7+i*1.9;const c=group(x,0,-17);box(c,.65,.42,.5,wood2,0,.21,0);box(c,.69,.05,.54,wood,0,.44,0)}
-// 悬挂老吊灯
-for(const x of [-4,0,4]){const g=group(x,0,-3);cyl(g,.018,.018,1.3,iron,0,7.1,0);const s=new THREE.Mesh(new THREE.CylinderGeometry(.42,.22,.34,20,1,true),brass);s.position.y=6.4;g.add(s);const l=new THREE.PointLight(0xffc17d,26,8);l.position.set(x,6.25,-3);scene.add(l)}
-// 门口旧地毯与杂物
-rug(0,7,4.5,2.2);crate(-6.5,5.4);crate(6.1,5.8);armchair(1.9,6.2,.2,'#4b3329');
-let targetX=0,targetY=0,lookX=0,lookY=0,travel=0,startY=0,lastTouch=0;
+for(let z=10;z>-22;z-=1.1){const p=new THREE.Mesh(new THREE.BoxGeometry(24,.035,1.06),mat(z%2?'#59432f':'#503b29'));p.position.set(0,-.085,z-5);p.receiveShadow=true;scene.add(p)}
+const wall=mat('#594638');const left=new THREE.Mesh(new THREE.PlaneGeometry(34,8),wall);left.rotation.y=Math.PI/2;left.position.set(-8,4,-5);scene.add(left);const right=new THREE.Mesh(new THREE.PlaneGeometry(34,8),wall);right.rotation.y=-Math.PI/2;right.position.set(8,4,-5);scene.add(right);const back=new THREE.Mesh(new THREE.PlaneGeometry(16,8),wall);back.position.set(0,4,-22);scene.add(back);const ceiling=new THREE.Mesh(new THREE.PlaneGeometry(16,34),mat('#30251b'));ceiling.rotation.x=Math.PI/2;ceiling.position.set(0,8,-5);scene.add(ceiling);
+function box(w,h,d,c,x,y,z){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(c));o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;scene.add(o);return o}
+function rug(x,z,w,d){box(w,.035,d,'#744c35',x,-.045,z);box(w-.18,.04,d-.18,'#a07a55',x,-.015,z)}
+function crate(x,z){box(.9,.62,.72,'#65432a',x,.31,z);for(let y=.12;y<.62;y+=.18)box(.94,.045,.76,'#8a603b',x,y,z)}
+function floorLamp(x,z){const stem=new THREE.Mesh(new THREE.CylinderGeometry(.035,.045,1.8,12),mat('#987448'));stem.position.set(x,.95,z);scene.add(stem);const shade=new THREE.Mesh(new THREE.CylinderGeometry(.38,.18,.48,20,1,true),mat('#9b8870'));shade.position.set(x,1.95,z);scene.add(shade);const l=new THREE.PointLight(0xffc982,18,5);l.position.set(x,1.9,z);scene.add(l)}
+rug(-.3,-.4,5.8,3.4);rug(0,-8,5,3.4);rug(0,7,4.5,2.2);crate(-6.5,5.4);crate(6.1,5.8);floorLamp(-5.9,3.3);floorLamp(4.3,-4.7);
+const loader=new GLTFLoader();const assets=[
+{url:'https://files.innerscene.com/library/victorian-leather-sofa-3a3ebd7e/5e875109d66562a32c61/polyhaven-sofa-03.glb',width:2.75,positions:[[-4.5,1.6,.1],[4.6,-7,.2]]},
+{url:'https://files.innerscene.com/library/victorian-armchair-f000c44f/a2ca475762c8930d0da6/polyhaven-armchair-01.glb',width:1.05,positions:[[-2.5,2.8,-.3],[3.5,2.4,.3],[2.5,-5.6,-.2],[-1.8,-2.4,.1]]},
+{url:'https://files.innerscene.com/library/victorian-carved-sofa-812af357/702f0a24fccb9531bad8/polyhaven-sofa-01.glb',width:2.4,positions:[[4.4,-12,.1],[-4.2,-15,-.2]]},
+{url:'https://files.innerscene.com/library/victorian-console-table-8d86c520/c206978e362f1a904176/polyhaven-classicconsole-01.glb',width:1.9,positions:[[5.4,1.2,-.15],[-5.3,-7,.1],[0,-19,0]]}
+];
+let loaded=0;const status={failed:[]};
+function placeModel(root,spec,pos){const model=root.clone(true);const bounds=new THREE.Box3().setFromObject(model);const size=bounds.getSize(new THREE.Vector3());const scale=spec.width/Math.max(size.x,size.z);model.scale.setScalar(scale);const b2=new THREE.Box3().setFromObject(model);model.position.set(pos[0],-b2.min.y*scale,pos[1]);model.rotation.y=pos[2];model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(o.material){o.material.side=THREE.DoubleSide}}});scene.add(model)}
+assets.forEach(spec=>loader.load(spec.url,gltf=>{const root=gltf.scene;spec.positions.forEach(p=>placeModel(root,spec,p));loaded+=spec.positions.length;document.documentElement.dataset.realFurniture=String(loaded)},undefined,error=>{status.failed.push(spec.url);console.error('真实家具模型加载失败',error);document.documentElement.dataset.assetError='true'}));
+const clock=new THREE.Clock();let targetX=0,targetY=0,lookX=0,lookY=0,travel=0,lastTouch=0;
 window.addEventListener('pointermove',e=>{targetX=(e.clientX/innerWidth-.5)*.75;targetY=(e.clientY/innerHeight-.5)*.28});
 window.addEventListener('wheel',e=>{travel=THREE.MathUtils.clamp(travel+e.deltaY*.006,-1.5,11)},{passive:true});
-window.addEventListener('touchstart',e=>{startY=e.touches[0].clientY;lastTouch=startY},{passive:true});
+window.addEventListener('touchstart',e=>lastTouch=e.touches[0].clientY,{passive:true});
 window.addEventListener('touchmove',e=>{const y=e.touches[0].clientY;targetX=(e.touches[0].clientX/innerWidth-.5)*.5;travel=THREE.MathUtils.clamp(travel+(lastTouch-y)*.018,-1.5,11);lastTouch=y},{passive:true});
-const clock=new THREE.Clock();
-function animate(){requestAnimationFrame(animate);const t=clock.getElapsedTime();lookX+=(targetX-lookX)*.035;lookY+=(targetY-lookY)*.035;camera.position.x=lookX*2.8;camera.position.y=2.25+lookY+Math.sin(t*.35)*.018;camera.position.z=10.5-travel;camera.lookAt(lookX*1.7,1.8+lookY*1.4,-5-travel*.8);renderer.render(scene,camera)}
-animate();window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+function animate(){requestAnimationFrame(animate);const t=clock.getElapsedTime();lookX+=(targetX-lookX)*.035;lookY+=(targetY-lookY)*.035;camera.position.x=lookX*2.8;camera.position.y=2.25+lookY+Math.sin(t*.35)*.018;camera.position.z=10.5-travel;camera.lookAt(lookX*1.7,1.8+lookY*1.4,-5-travel*.8);renderer.render(scene,camera)}animate();
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 </script></body></html>
