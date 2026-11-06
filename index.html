@@ -1,119 +1,27 @@
-<!doctype html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#171613">
-<title>SECOND LIFE — Objects Outlive Us</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500&display=swap" rel="stylesheet">
-<style>
-:root{--paper:#d8cbb3;--dim:#958875;--gold:#b58e5c;--mono:'DM Mono',monospace;--serif:'Cormorant Garamond',serif}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#171613;color:var(--paper)}
-body{font-family:var(--serif);cursor:crosshair}#world{position:fixed;inset:0}canvas{display:block;width:100%;height:100%;touch-action:none}
-#veil{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 51% 45%,transparent 25%,#08080735 68%,#080807d9 120%),linear-gradient(0deg,#0b0a08b8,transparent 27%,transparent 75%,#0b0a0870);z-index:2}
-#grain{position:fixed;inset:-50%;width:200%;height:200%;z-index:3;pointer-events:none;opacity:.075;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");animation:grain .22s steps(2) infinite}
-@keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-2%,1%)}50%{transform:translate(1%,-2%)}75%{transform:translate(2%,2%)}100%{transform:translate(-1%,-1%)}}
-#identity{position:fixed;z-index:5;left:34px;top:30px;display:flex;align-items:center;gap:12px;pointer-events:none}
-#sigil{width:27px;height:27px;border:1px solid #b9956b;border-radius:50%;display:grid;place-items:center;font:11px var(--serif);color:#d2b58e}
-#identity span{font:8px var(--mono);letter-spacing:.22em;color:#d4c5ac}
-#coordinate{position:fixed;z-index:5;right:34px;top:34px;text-align:right;font:8px/1.9 var(--mono);letter-spacing:.15em;color:#aa9b83;pointer-events:none}
-#coordinate b{display:block;font-weight:400;color:#dfc9a6}
-#objectTitle{position:fixed;z-index:5;left:7vw;bottom:11vh;pointer-events:none;transition:opacity .5s,transform .5s}
-#objectTitle .eyebrow{font:8px var(--mono);letter-spacing:.22em;color:#c39a68}
-#objectTitle h1{font:400 clamp(44px,7vw,100px)/.86 var(--serif);letter-spacing:-.035em;margin:15px 0 9px;color:#e8ddc9;text-shadow:0 4px 30px #0008}
-#objectTitle p{font:10px/1.9 'Noto Serif SC',serif;letter-spacing:.08em;color:#b5a58c;margin:0}
-#objectTitle.hidden{opacity:0;transform:translateY(14px)}
-#prompt{position:fixed;z-index:5;left:50%;bottom:32px;transform:translateX(-50%);font:8px var(--mono);letter-spacing:.18em;color:#a99b84;white-space:nowrap;pointer-events:none}
-#prompt i{font-style:normal;color:#d1ad7d;margin:0 9px}
-#progress{position:fixed;z-index:5;right:35px;bottom:35px;display:flex;gap:8px;align-items:center}
-#progress button{width:5px;height:5px;padding:0;border:0;border-radius:50%;background:#756957;cursor:pointer;transition:.3s}
-#progress button.active{width:24px;border-radius:5px;background:#d0ae7e}
-#inspect{position:fixed;z-index:8;inset:0;display:grid;place-items:center;background:#090806a8;backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .4s}
-#inspect.open{opacity:1;pointer-events:auto}
-#paper{position:relative;width:min(570px,86vw);padding:clamp(28px,5vw,58px);background:#d8cbb2;color:#282219;box-shadow:0 30px 100px #000b;transform:translateY(18px) rotate(-1deg);transition:transform .5s}
-#inspect.open #paper{transform:translateY(0) rotate(-1deg)}
-#paper:before{content:"";position:absolute;inset:12px;border:1px solid #6f5c4238;pointer-events:none}
-#paper .stamp{font:8px var(--mono);letter-spacing:.2em;color:#806746}
-#paper h2{font:500 clamp(35px,6vw,58px)/.95 var(--serif);margin:25px 0 15px}
-#paper p{font:12px/2.2 'Noto Serif SC',serif;color:#514638;max-width:430px}
-#paper .meta{display:flex;gap:28px;margin-top:28px;padding-top:18px;border-top:1px solid #76634855;font:8px/1.8 var(--mono);letter-spacing:.1em;color:#79674e}
-#close{position:absolute;right:27px;top:25px;border:0;background:none;color:#493b2a;font:22px var(--serif);cursor:pointer}
-#inspectHint{position:fixed;z-index:6;left:50%;top:50%;transform:translate(-50%,-50%);font:8px var(--mono);letter-spacing:.2em;color:#e3c89f;opacity:0;pointer-events:none;text-shadow:0 2px 12px #000;transition:opacity .2s}
-#inspectHint.show{opacity:1}
-#fade{position:fixed;z-index:10;inset:0;background:#12100d;pointer-events:none;opacity:0;transition:opacity .55s}
-#fade.on{opacity:1}
-@media(max-width:700px){#identity{left:18px;top:18px}#coordinate{right:18px;top:18px;font-size:7px}#objectTitle{left:7vw;bottom:14vh}#objectTitle h1{font-size:54px}#prompt{bottom:24px;font-size:7px;letter-spacing:.1em}#progress{right:18px;bottom:56px}#paper{padding:34px 28px}#paper .meta{gap:13px;flex-wrap:wrap}}
-</style>
-</head>
-<body>
-<div id="world"></div><div id="veil"></div><div id="grain"></div>
-<div id="identity"><div id="sigil">S</div><span>SECOND LIFE<br>OBJECTS OUTLIVE US</span></div>
-<div id="coordinate"><b id="coordNo">01 / 03</b><span id="coordType">FOUND IN THE WAREHOUSE</span></div>
-<div id="objectTitle"><div class="eyebrow" id="titleEyebrow">ARCHIVE NO. 001 · c. 1890</div><h1 id="titleName">The Heirloom<br>Chair</h1><p id="titleDesc">一把椅子，记得比人更久。</p></div>
-<div id="prompt"><i>SCROLL</i> MOVE THROUGH TIME <i>·</i> CLICK TO TOUCH THE OBJECT</div>
-<div id="progress"><button class="active" data-index="0" aria-label="Object 1"></button><button data-index="1" aria-label="Object 2"></button><button data-index="2" aria-label="Object 3"></button></div>
-<div id="inspect"><div id="paper"><button id="close" aria-label="Close">×</button><div class="stamp" id="paperStamp">OBJECT RECORD / 001</div><h2 id="paperTitle">The Heirloom Chair</h2><p id="paperStory"></p><div class="meta"><span id="paperPeriod">1890 · VICTORIAN</span><span id="paperMaterial">WALNUT / LEATHER</span><span>UNRESTORED</span></div></div></div>
-<div id="inspectHint">CLICK TO OPEN THE OBJECT RECORD</div><div id="fade"></div>
-<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js"}}</script>
-<script type="module">
-import * as THREE from 'three';
-const $=s=>document.querySelector(s);
-const scene=new THREE.Scene();scene.background=new THREE.Color('#171613');scene.fog=new THREE.FogExp2('#171613',.027);
-const camera=new THREE.PerspectiveCamera(43,innerWidth/innerHeight,.1,100);camera.position.set(0,3.2,9);
-const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.2;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;$('#world').appendChild(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0xb9a78d,0x17120d,.85));
-const key=new THREE.DirectionalLight(0xffd5a1,4.4);key.position.set(-5,10,5);key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.camera.left=-12;key.shadow.camera.right=12;key.shadow.camera.top=12;key.shadow.camera.bottom=-12;scene.add(key);
-const fill=new THREE.DirectionalLight(0x84909a,.7);fill.position.set(7,4,-6);scene.add(fill);
-const spot=new THREE.SpotLight(0xffd6a5,85,24,.42,.7,1.5);spot.position.set(-2,8,4);spot.target.position.set(0,1,0);scene.add(spot,spot.target);
-function mat(color,rough=.8,metal=0){return new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal})}
-const wood=mat('#4a2d1b',.72),wood2=mat('#68462b',.7),darkWood=mat('#291b13',.82),leather=mat('#38251e',.94),leather2=mat('#5a3b2c',.9),brass=mat('#927044',.45,.72),dustMat=new THREE.PointsMaterial({color:0xd8bd91,size:.035,transparent:true,opacity:.55,depthWrite:false});
-const floor=new THREE.Mesh(new THREE.PlaneGeometry(50,50),mat('#29251f',.98));floor.rotation.x=-Math.PI/2;floor.position.y=-.03;floor.receiveShadow=true;scene.add(floor);
-const back=new THREE.Mesh(new THREE.PlaneGeometry(30,13),mat('#25211b',1));back.position.set(0,6,-8);back.receiveShadow=true;scene.add(back);
-for(let x=-12;x<=12;x+=4){const beam=new THREE.Mesh(new THREE.BoxGeometry(.18,.2,17),darkWood);beam.position.set(x,7.5,-.2);beam.rotation.x=.1;beam.castShadow=true;scene.add(beam)}
-for(let z=-6;z<=5;z+=3){const seam=new THREE.Mesh(new THREE.BoxGeometry(30,.02,.035),mat('#171512'));seam.position.set(0,.01,z);scene.add(seam)}
-const dustGeo=new THREE.BufferGeometry(),dustN=850,dustP=new Float32Array(dustN*3);for(let i=0;i<dustN;i++){dustP[i*3]=(Math.random()-.5)*20;dustP[i*3+1]=Math.random()*7;dustP[i*3+2]=(Math.random()-.5)*17-1}dustGeo.setAttribute('position',new THREE.BufferAttribute(dustP,3));const dust=new THREE.Points(dustGeo,dustMat);scene.add(dust);
-const objects=[];
-function box(parent,w,h,d,material,x,y,z,rx=0,ry=0,rz=0){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);m.position.set(x,y,z);m.rotation.set(rx,ry,rz);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m}
-function lathe(parent,pts,material,x,y,z){const m=new THREE.Mesh(new THREE.LatheGeometry(pts.map(p=>new THREE.Vector2(p[0],p[1])),12),material);m.position.set(x,y,z);m.castShadow=true;parent.add(m);return m}
-function makeChair(){const g=new THREE.Group();g.position.set(0,0,0);
-for(const x of [-.72,.72])for(const z of [-.62,.62]){lathe(g,[[.11,0],[.095,.18],[.07,.55],[.1,.8],[.12,.86]],wood,x,.02,z);box(g,.19,.1,.18,wood,x,.75,z)}
-box(g,1.55,.22,1.42,wood2,0,.92,0);const seat=new THREE.Mesh(new THREE.BoxGeometry(1.38,.2,1.23,8,2,8),leather);seat.position.set(0,1.09,0);seat.castShadow=true;g.add(seat);
-for(let x=-.48;x<=.49;x+=.32)for(let z=-.42;z<=.43;z+=.28){const b=new THREE.Mesh(new THREE.SphereGeometry(.035,10,8),brass);b.position.set(x,1.2,z);g.add(b)}
-for(const x of [-.69,.69]){box(g,.13,1.05,.14,wood,x,1.52,-.61);box(g,.13,.95,.14,wood,x,1.47,.61);box(g,.16,.12,1.35,wood2,x,2.02,0);const arm=new THREE.Mesh(new THREE.CylinderGeometry(.09,.13,1.28,12),wood2);arm.rotation.x=Math.PI/2;arm.position.set(x,1.7,0);arm.castShadow=true;g.add(arm)}
-box(g,1.25,1.12,.16,wood2,0,1.72,-.65);const backPad=box(g,1.08,.88,.12,leather2,0,1.76,-.75);backPad.rotation.x=-.05;
-for(let x=-.38;x<=.39;x+=.25)for(let y=1.48;y<=2.03;y+=.24){const b=new THREE.Mesh(new THREE.SphereGeometry(.035,10,8),brass);b.position.set(x,y,-.675);g.add(b)}
-return g}
-function makeCabinet(){const g=new THREE.Group();g.position.set(0,0,0);box(g,2.4,2.8,.85,wood,0,1.55,0);box(g,2.5,.16,.98,wood2,0,3.02,0);box(g,2.55,.13,1.02,darkWood,0,.12,0);
-for(const x of [-.83,0,.83]){box(g,.72,.78,.08,wood2,x,2.28,-.46);box(g,.72,.78,.08,wood2,x,1.35,-.46);for(const y of [2.28,1.35]){const k=new THREE.Mesh(new THREE.SphereGeometry(.07,12,10),brass);k.position.set(x,y,-.54);g.add(k)}}
-for(const x of [-.95,.95])box(g,.12,.25,.12,darkWood,x,.1,.1);
-return g}
-function makeDesk(){const g=new THREE.Group();box(g,2.7,.2,1.35,wood2,0,1.62,0);for(const x of [-1.08,1.08]){box(g,.55,1.55,1.05,wood,x,.82,0);for(let y=.45;y<1.45;y+=.42){box(g,.48,.3,.08,wood2,x,y,-.56);const k=new THREE.Mesh(new THREE.SphereGeometry(.045,10,8),brass);k.position.set(x,y,-.63);g.add(k)}}for(const x of [-1.15,1.15])for(const z of [-.5,.5])box(g,.12,.22,.12,darkWood,x,.12,z);box(g,2.3,.08,.1,darkWood,0,1.45,-.58);return g}
-const data=[
-{name:'The Heirloom\nChair',eyebrow:'ARCHIVE NO. 001 · c. 1890',desc:'一把椅子，记得比人更久。',period:'1890 · VICTORIAN',material:'WALNUT / LEATHER',story:'它曾经属于一位铁路工程师的书房。扶手被手掌磨得发亮，皮革上留下了漫长冬夜的褶皱。我们没有修补这些痕迹——它们就是这把椅子的履历。',make:makeChair},
-{name:'The Quiet\nKeeper',eyebrow:'ARCHIVE NO. 002 · c. 1912',desc:'抽屉里，时间没有被清空。',period:'1912 · EDWARDIAN',material:'DARK OAK / BRASS',story:'这只橡木柜在同一个家庭里待了三代。抽屉底部还留着铅笔写下的尺寸、旧信封的胶痕，以及一枚早已失去光泽的黄铜把手。',make:makeCabinet},
-{name:'The Maker’s\nTable',eyebrow:'ARCHIVE NO. 003 · c. 1930',desc:'每一道划痕，都是一次制作。',period:'1930 · WORKSHOP',material:'OAK / IRON',story:'它不是被陈列的家具，而是一张真正工作过的桌子。刀痕、墨迹和被锤子击出的浅坑仍在桌面上。上一位主人离开时，最后一件作品还没有完成。',make:makeDesk}
-];
-data.forEach((d,i)=>{const group=new THREE.Group();const model=d.make();model.scale.setScalar(i===0?1.05:i===1?.94:.96);group.add(model);group.position.set(0,0,0);scene.add(group);objects.push({group,model,data:d,index:i})});
-let current=0,targetYaw=0,yaw=0,drag=false,lastX=0,lastY=0,startX=0,startY=0,hover=-1,opened=false;
-const ray=new THREE.Raycaster(),pointer=new THREE.Vector2();
-function updateText(){const d=data[current];$('#coordNo').textContent=String(current+1).padStart(2,'0')+' / 03';$('#coordType').textContent=['FOUND IN THE WAREHOUSE','FOUND IN THE BACK ROOM','FOUND IN THE WORKSHOP'][current];$('#titleEyebrow').textContent=d.eyebrow;$('#titleName').innerHTML=d.name.replace('\n','<br>');$('#titleDesc').textContent=d.desc;document.querySelectorAll('#progress button').forEach((b,i)=>b.classList.toggle('active',i===current))}
-function moveTo(i){if(i===current)return;current=(i+3)%3;updateText();$('#fade').classList.add('on');setTimeout(()=>$('#fade').classList.remove('on'),160);$('#inspect').classList.remove('open');opened=false;targetYaw=0}
-function hit(e){const r=renderer.domElement.getBoundingClientRect();pointer.x=(e.clientX-r.left)/r.width*2-1;pointer.y=-((e.clientY-r.top)/r.height)*2+1;ray.setFromCamera(pointer,camera);const hits=ray.intersectObjects(objects[current].group.children,true);return hits.length?0:-1}
-renderer.domElement.addEventListener('pointermove',e=>{if(drag){targetYaw+=(e.clientX-lastX)*.004;lastX=e.clientX;lastY=e.clientY;return}const h=hit(e);hover=h;$('#inspectHint').classList.toggle('show',h>=0&&!opened)});
-renderer.domElement.addEventListener('pointerdown',e=>{drag=true;startX=lastX=e.clientX;startY=lastY=e.clientY;renderer.domElement.setPointerCapture(e.pointerId)});
-renderer.domElement.addEventListener('pointerup',e=>{if(!drag)return;drag=false;if(Math.hypot(e.clientX-startX,e.clientY-startY)<6&&hover>=0)openRecord()});
-renderer.domElement.addEventListener('pointercancel',()=>drag=false);
-renderer.domElement.addEventListener('wheel',e=>{if(Math.abs(e.deltaY)>8)moveTo(current+(e.deltaY>0?1:-1))},{passive:true});
-window.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='PageDown')moveTo(current+1);if(e.key==='ArrowLeft'||e.key==='PageUp')moveTo(current-1);if(e.key==='Escape')closeRecord()});
-function openRecord(){const d=data[current];$('#paperStamp').textContent='OBJECT RECORD / 00'+(current+1);$('#paperTitle').textContent=d.name.replace('\n',' ');$('#paperStory').textContent=d.story;$('#paperPeriod').textContent=d.period;$('#paperMaterial').textContent=d.material;$('#inspect').classList.add('open');opened=true;$('#inspectHint').classList.remove('show')}
-function closeRecord(){$('#inspect').classList.remove('open');opened=false}
-$('#close').addEventListener('click',closeRecord);$('#inspect').addEventListener('click',e=>{if(e.target===$('#inspect'))closeRecord()});
-document.querySelectorAll('#progress button').forEach(b=>b.addEventListener('click',()=>moveTo(Number(b.dataset.index))));
-updateText();
-const clock=new THREE.Clock();
-function animate(){requestAnimationFrame(animate);const t=clock.getElapsedTime();yaw+=(targetYaw-yaw)*.055;camera.position.x=Math.sin(yaw)*9;camera.position.y=3.05+Math.sin(t*.25)*.035;camera.position.z=Math.cos(yaw)*9;camera.lookAt(0,1.25,0);objects.forEach((o,i)=>{o.group.rotation.y+=(i===current?Math.sin(t*.18)*.025:0);o.group.visible=i===current});spot.target.position.set(0,1.15,0);spot.position.x=-2+Math.sin(t*.16)*.4;dust.rotation.y=t*.008;renderer.render(scene,camera)}
-animate();
-window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
-</script>
-</body></html>
+<!doctype html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#171713"><title>旧物新生｜沉浸式旧家具空间</title><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500&display=swap" rel="stylesheet"><style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#171713;color:#e9dfcc;font-family:'Noto Serif SC',serif}#scene{position:fixed;inset:0}canvas{display:block;width:100%;height:100%;touch-action:none}#shade{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 20%,#090907aa 100%),linear-gradient(0deg,#090907c9,transparent 34%,#09090755);z-index:2}#grain{position:fixed;inset:-50%;width:200%;height:200%;opacity:.05;pointer-events:none;z-index:3;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E")}#brand{position:fixed;z-index:5;top:30px;left:38px;display:flex;align-items:center;gap:12px;pointer-events:none}#seal{width:32px;height:32px;border:1px solid #b99a70;border-radius:50%;display:grid;place-items:center;color:#d4b98f}#brand span{font-size:10px;letter-spacing:.2em;line-height:1.8;color:#d7c9b2}#chapter{position:fixed;z-index:5;right:40px;top:34px;text-align:right;pointer-events:none;color:#b3a187;font-size:10px;line-height:2}#chapter strong{display:block;color:#e1cfb0;font-size:14px;font-weight:400}#story{position:fixed;z-index:5;left:8vw;bottom:12vh;max-width:460px;pointer-events:none;text-shadow:0 3px 25px #000;transition:opacity .55s,transform .55s}#story.fade{opacity:0;transform:translateY(16px)}#age{font-size:10px;letter-spacing:.16em;color:#c6a477}h1{font-weight:300;font-size:clamp(42px,6.7vw,88px);line-height:1.12;letter-spacing:.04em;margin:16px 0 12px}#intro{font-size:13px;line-height:2.2;letter-spacing:.08em;color:#c6b99f;margin:0}#discovery{position:fixed;z-index:6;right:8vw;bottom:13vh;width:min(300px,34vw);padding:20px 0;border-top:1px solid #c9ad8066;border-bottom:1px solid #c9ad8044;opacity:0;transform:translateY(12px);transition:.5s;pointer-events:none}#discovery.show{opacity:1;transform:translateY(0)}#discovery .label{font-size:9px;letter-spacing:.18em;color:#c9a678}#discovery h2{font-size:23px;font-weight:400;margin:12px 0 8px}#discovery p{font-size:11px;line-height:2;color:#c1b39a;margin:0}#hint{position:fixed;z-index:5;left:50%;bottom:32px;transform:translateX(-50%);font-size:10px;letter-spacing:.16em;color:#c3b397;white-space:nowrap;pointer-events:none}#fade{position:fixed;z-index:9;inset:0;background:#11110e;opacity:0;pointer-events:none;transition:opacity .5s}#fade.on{opacity:1}@media(max-width:700px){#brand{left:18px;top:18px}#chapter{right:18px;top:20px;font-size:8px}#story{left:7vw;bottom:17vh;max-width:84vw}h1{font-size:52px}#intro{font-size:11px}#discovery{right:7vw;bottom:7vh;width:70vw;padding:12px 0}#hint{bottom:22px;font-size:8px;letter-spacing:.08em}}
+</style></head><body><div id="scene"></div><div id="shade"></div><div id="grain"></div><div id="brand"><div id="seal">旧</div><span>旧物新生<br>让时间继续生活</span></div><div id="chapter"><strong id="number">第一件旧物</strong><span id="place">仓库深处 · 午后微光</span></div><div id="story"><div id="age">一九〇〇年前后 · 老橡木与旧皮革</div><h1 id="name">一把被时光<br>留下的椅子</h1><p id="intro">它曾陪伴一个家庭度过漫长岁月。<br>如今，阳光再次落在它的扶手上。</p></div><div id="discovery"><div class="label">你正在注视这件旧物</div><h2 id="detailName">扶手上的岁月</h2><p id="detailText">反复触摸留下的光泽没有被打磨掉。那不是瑕疵，而是它曾被珍惜的证据。</p></div><div id="hint">移动视线，靠近一件旧物 · 上下滑动，走进下一段记忆</div><div id="fade"></div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js"}}</script><script type="module">
+import * as THREE from 'three';const $=s=>document.querySelector(s);
+const scene=new THREE.Scene();scene.background=new THREE.Color('#191813');scene.fog=new THREE.FogExp2('#191813',.026);
+const camera=new THREE.PerspectiveCamera(43,innerWidth/innerHeight,.1,100);camera.position.set(0,3.1,8.5);
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.18;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;$('#scene').appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xbba98c,0x17130e,.85));const sun=new THREE.DirectionalLight(0xffd6a3,4.2);sun.position.set(-5,10,5);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);scene.add(sun);const spot=new THREE.SpotLight(0xffd4a0,95,25,.38,.72,1.4);spot.position.set(-2,8,3);spot.target.position.set(0,1,0);scene.add(spot,spot.target);scene.add(new THREE.DirectionalLight(0x89929a,.65));
+const mat=(c,r=.8,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});const oak=mat('#4a2d1c'),oak2=mat('#69472b'),dark=mat('#241a13'),leather=mat('#38251f',.96),worn=mat('#694735',.92),brass=mat('#987448',.45,.7),dustMat=new THREE.PointsMaterial({color:0xe5cda5,size:.035,transparent:true,opacity:.5,depthWrite:false});
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(50,50),mat('#29251f'));floor.rotation.x=-Math.PI/2;floor.position.y=-.04;floor.receiveShadow=true;scene.add(floor);const back=new THREE.Mesh(new THREE.PlaneGeometry(28,13),mat('#25221c'));back.position.set(0,6,-8);scene.add(back);
+for(let x=-12;x<=12;x+=4){const b=new THREE.Mesh(new THREE.BoxGeometry(.18,.2,18),dark);b.position.set(x,7.5,-.2);b.castShadow=true;scene.add(b)}
+const frame=mat('#65543c');for(const x of [-3.1,0,3.1]){const o=new THREE.Mesh(new THREE.BoxGeometry(.12,4.4,.16),frame);o.position.set(x,4.4,-7.75);scene.add(o)}for(const y of [2.2,4.4,6.6]){const o=new THREE.Mesh(new THREE.BoxGeometry(6.3,.12,.16),frame);o.position.set(0,y,-7.75);scene.add(o)}
+const dg=new THREE.BufferGeometry(),dp=new Float32Array(3000);for(let i=0;i<1000;i++){dp[i*3]=(Math.random()-.5)*18;dp[i*3+1]=Math.random()*7;dp[i*3+2]=(Math.random()-.5)*15-1}dg.setAttribute('position',new THREE.BufferAttribute(dp,3));const dust=new THREE.Points(dg,dustMat);scene.add(dust);
+function box(g,w,h,d,m,x,y,z){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;g.add(o);return o}function leg(g,x,z,h,m){const o=new THREE.Mesh(new THREE.CylinderGeometry(.075,.12,h,12),m);o.position.set(x,h/2,z);o.castShadow=true;g.add(o)}
+function chair(){const g=new THREE.Group();for(const x of [-.68,.68])for(const z of [-.58,.58])leg(g,x,z,.9,oak);box(g,1.55,.2,1.35,oak2,0,.92,0);box(g,1.36,.16,1.17,leather,0,1.08,0);box(g,1.22,1.05,.16,oak2,0,1.62,-.58);box(g,1.02,.82,.08,worn,0,1.65,-.69);for(const x of [-.68,.68]){box(g,.13,1.1,.13,oak,x,1.48,-.58);box(g,.13,1,.13,oak,x,1.4,.58);const a=new THREE.Mesh(new THREE.CylinderGeometry(.09,.13,1.3,12),oak2);a.rotation.x=Math.PI/2;a.position.set(x,1.65,0);g.add(a)}for(let x=-.4;x<=.4;x+=.2)for(let y=1.35;y<=1.95;y+=.2){const n=new THREE.Mesh(new THREE.SphereGeometry(.025,8,8),brass);n.position.set(x,y,-.685);g.add(n)}return g}
+function cabinet(){const g=new THREE.Group();box(g,2.25,2.7,.82,oak,0,1.45,0);box(g,2.45,.18,1,oak2,0,2.88,0);box(g,2.5,.12,1.02,dark,0,.08,0);for(const x of [-.75,0,.75])for(const y of [1.05,2.05]){box(g,.68,.78,.08,oak2,x,y,-.45);box(g,.55,.64,.035,dark,x,y,-.5);const k=new THREE.Mesh(new THREE.SphereGeometry(.065,12,10),brass);k.position.set(x,y,-.56);g.add(k)}for(const x of [-.95,.95])box(g,.12,.22,.12,dark,x,.18,.1);return g}
+function table(){const g=new THREE.Group();box(g,2.8,.2,1.35,oak2,0,1.58,0);for(const x of [-1.1,1.1]){box(g,.55,1.48,1.05,oak,x,.8,0);for(let y=.42;y<1.4;y+=.42){box(g,.48,.28,.08,oak2,x,y,-.55);const k=new THREE.Mesh(new THREE.SphereGeometry(.04,10,8),brass);k.position.set(x,y,-.61);g.add(k)}}for(const x of [-1.18,1.18])for(const z of [-.5,.5])box(g,.12,.18,.12,dark,x,.1,z);return g}
+const data=[{make:chair,n:'一把被时光<br>留下的椅子',age:'一九〇〇年前后 · 老橡木与旧皮革',intro:'它曾陪伴一个家庭度过漫长岁月。<br>如今，阳光再次落在它的扶手上。',place:'仓库深处 · 午后微光',dn:'扶手上的岁月',dt:'反复触摸留下的光泽没有被打磨掉。那不是瑕疵，而是它曾被珍惜的证据。'},{make:cabinet,n:'沉默的<br>橡木柜',age:'一九一二年 · 深色橡木与黄铜',intro:'抽屉里藏着旧信封、褪色的照片，<br>还有一个家庭没有说完的故事。',place:'仓库后室 · 灰尘与旧信',dn:'抽屉深处',dt:'柜门边缘被岁月磨圆，铜把手已经暗淡。抽屉底板还留着铅笔写下的名字。'},{make:table,n:'仍然记得<br>双手的工作台',age:'一九三〇年前后 · 橡木与铁件',intro:'刀痕、墨迹和浅浅的凹坑，<br>记录着一个匠人漫长的日常。',place:'旧工坊 · 尚未散去的木香',dn:'桌面上的刻痕',dt:'每一道划痕都来自一次真实的制作。它没有被翻新成崭新的样子，只等待下一双手。'}];
+const groups=data.map(d=>{const g=new THREE.Group();g.add(d.make());scene.add(g);return g});let index=0,ax=0,ay=0,lx=0,ly=0,lock=false,seen=false,touchY=0;
+function update(){const d=data[index];$('#number').textContent=['第一件旧物','第二件旧物','第三件旧物'][index];$('#place').textContent=d.place;$('#age').textContent=d.age;$('#name').innerHTML=d.n;$('#intro').innerHTML=d.intro;$('#detailName').textContent=d.dn;$('#detailText').textContent=d.dt;groups.forEach((g,i)=>g.visible=i===index);$('#story').classList.remove('fade');$('#discovery').classList.remove('show');seen=false}
+function move(dir){if(lock)return;const n=Math.max(0,Math.min(2,index+dir));if(n===index)return;lock=true;$('#fade').classList.add('on');setTimeout(()=>{index=n;update();$('#fade').classList.remove('on');setTimeout(()=>lock=false,550)},380)}
+window.addEventListener('wheel',e=>{if(Math.abs(e.deltaY)>12)move(e.deltaY>0?1:-1)},{passive:true});window.addEventListener('keydown',e=>{if(e.key==='ArrowDown'||e.key==='PageDown')move(1);if(e.key==='ArrowUp'||e.key==='PageUp')move(-1)});
+const ray=new THREE.Raycaster(),pointer=new THREE.Vector2();window.addEventListener('pointermove',e=>{ax=(e.clientX/innerWidth-.5)*.72;ay=(e.clientY/innerHeight-.5)*.3;pointer.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);ray.setFromCamera(pointer,camera);const found=ray.intersectObjects(groups[index].children,true).length>0;if(found!==seen){seen=found;$('#discovery').classList.toggle('show',found);$('#story').classList.toggle('fade',found)}});
+window.addEventListener('touchstart',e=>touchY=e.touches[0].clientY,{passive:true});window.addEventListener('touchend',e=>{const d=touchY-e.changedTouches[0].clientY;if(Math.abs(d)>45)move(d>0?1:-1)},{passive:true});
+update();const clock=new THREE.Clock();function animate(){requestAnimationFrame(animate);const t=clock.getElapsedTime();lx+=(ax-lx)*.025;ly+=(ay-ly)*.025;camera.position.set(lx*2.4,3.05+ly+Math.sin(t*.22)*.025,8.5);camera.lookAt(lx*.4,1.25,0);groups[index].rotation.y=Math.sin(t*.17)*.025;dust.rotation.y=t*.009;spot.position.x=-2+Math.sin(t*.14)*.45;renderer.render(scene,camera)}animate();window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+</script></body></html>
