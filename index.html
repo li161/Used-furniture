@@ -43,7 +43,7 @@
 <div id="scene"></div><div id="shade"></div><div id="grain"></div>
 <div id="mark">老物件集<small>一件家具，一段中国家庭的旧时光</small></div>
 <div id="status">旧木作 · 老家具 · 旧日常</div>
-<div id="hint">W A S D / 方向键行走 · 靠近摊位按 E 看样品 · ESC 返回</div>
+<div id="hint">W A S D / 方向键行走 · 靠近家具点击查看 · 拖动环绕 · ESC 返回</div>
 <div id="interact">靠近家具，点击查看</div>
 <section id="furnitureCard"><div class="eyebrow">旧物集 · 单件样品</div><h3 id="furnitureTitle">家具样品</h3><p id="furnitureDesc"></p><div class="close">拖动旋转 · 滚轮缩放 · ESC 返回</div></section><div id="inspectTip">正在查看家具 · 拖动旋转 · 滚轮缩放 · ESC 返回</div>
 <section id="stallCard"><div class="eyebrow">旧物集 · 摊位档案</div><h2 id="stallTitle">旧木家具</h2><p id="stallDesc"></p><div class="sample" id="stallSamples"></div><div class="close">按 ESC 继续逛集市</div></section>
@@ -98,9 +98,33 @@ function lattice(x,z){const g=new THREE.Group();g.position.set(x,2.55,z);for(let
 lattice(-7.72,4.5);lattice(7.72,4.5);
 // 老式青砖墙脚、剥落灰泥层和水渍
 for(let z=8;z>-27;z-=1.25){mesh(new THREE.BoxGeometry(.08,.52,1.18),material(z%2?'#51483e':'#5d5144'),-7.88,.28,z);mesh(new THREE.BoxGeometry(.08,.52,1.18),material(z%2?'#5b5044':'#51483e'),7.88,.28,z)}
-// 旧灯笼与钨丝灯的光晕
-function lantern(x,y,z){const frame=material('#5a3023',.72,.1);mesh(new THREE.CylinderGeometry(.36,.36,.65,8),material('#a34c32',.72),x,y,z);mesh(new THREE.CylinderGeometry(.39,.39,.08,8),frame,x,y+.36,z);mesh(new THREE.CylinderGeometry(.39,.39,.08,8),frame,x,y-.36,z);glow(x,y-.15,z,12,0xffa45c,5);beam(x,y+.63,z,.035,.48,.035,0,'#a47b45')}
-lantern(-4.8,5.2,1);lantern(4.7,5.2,-10);
+// 成组悬挂的中式红纱灯笼：灯骨、绸面、穗子与暖色照明
+const lanternLights=[];
+function lantern(x,y,z,scale=1,redTone='#a52f25'){
+ const g=new THREE.Group();g.position.set(x,y,z);g.scale.setScalar(scale);scene.add(g);
+ const silkCanvas=document.createElement('canvas');silkCanvas.width=256;silkCanvas.height=256;
+ const sg=silkCanvas.getContext('2d');const grad=sg.createLinearGradient(0,0,256,0);
+ grad.addColorStop(0,'#681c19');grad.addColorStop(.28,redTone);grad.addColorStop(.55,'#d45a3e');grad.addColorStop(.78,redTone);grad.addColorStop(1,'#651b18');
+ sg.fillStyle=grad;sg.fillRect(0,0,256,256);
+ for(let i=0;i<28;i++){sg.strokeStyle='rgba(255,211,157,'+(0.025+i%3*.012)+')';sg.lineWidth=1;sg.beginPath();sg.moveTo(i*10,0);sg.lineTo(i*10,256);sg.stroke()}
+ sg.fillStyle='rgba(246,202,132,.8)';sg.font='bold 40px serif';sg.textAlign='center';sg.fillText('福',128,142);
+ const silkTex=new THREE.CanvasTexture(silkCanvas);silkTex.colorSpace=THREE.SRGBColorSpace;
+ const silk=new THREE.Mesh(new THREE.SphereGeometry(.42,24,18),new THREE.MeshStandardMaterial({map:silkTex,color:0xffffff,roughness:.82,transparent:true,opacity:.94,emissive:0x5b160e,emissiveIntensity:.22}));
+ silk.scale.set(.86,1.12,.86);silk.castShadow=true;g.add(silk);
+ const brass=material('#a77a3e',.48,.6);
+ for(const yy of [-.43,.43]){const rim=new THREE.Mesh(new THREE.TorusGeometry(.34,.035,8,28),brass);rim.position.y=yy;rim.rotation.x=Math.PI/2;g.add(rim)}
+ const capTop=new THREE.Mesh(new THREE.CylinderGeometry(.17,.28,.12,12),brass);capTop.position.y=.49;g.add(capTop);
+ const capBottom=new THREE.Mesh(new THREE.CylinderGeometry(.28,.15,.12,12),brass);capBottom.position.y=-.49;g.add(capBottom);
+ for(let i=0;i<12;i++){const a=i/12*Math.PI*2;const rib=new THREE.Mesh(new THREE.CylinderGeometry(.009,.009,.91,5),brass);rib.position.set(Math.cos(a)*.34,0,Math.sin(a)*.34);g.add(rib)}
+ const cord=new THREE.Mesh(new THREE.CylinderGeometry(.012,.012,.45,6),brass);cord.position.y=.77;g.add(cord);
+ const tassel=new THREE.Group();tassel.position.y=-.55;g.add(tassel);
+ const knot=new THREE.Mesh(new THREE.SphereGeometry(.075,10,8),brass);tassel.add(knot);
+ for(let i=0;i<9;i++){const strand=new THREE.Mesh(new THREE.CylinderGeometry(.009,.004,.52,5),material('#b64a32'));strand.position.set((i-4)*.018,-.28,0);strand.rotation.z=(i-4)*.035;tassel.add(strand)}
+ const bulb=new THREE.PointLight(0xffad6b,17,7,2);bulb.position.y=-.04;g.add(bulb);lanternLights.push(bulb);
+ return g;
+}
+function lanternString(x,z,y=6.3){beam(x,y,z,.025,.9,.025,0,'#6b4b2e')}
+[[-5.9,5.8,1.8],[5.8,5.7,-4.4],[-5.9,5.7,-7.8],[5.8,5.8,-13.5],[-5.8,5.7,-19.4],[5.8,5.8,-25.2],[0,6.1,2.8],[0,6.1,-5.2],[0,6.1,-12.2],[0,6.1,-20.5]].forEach((p,i)=>{lanternString(p[0],p[2],p[1]+.6);lantern(p[0],p[1],p[2],i%3===0?.88:.72,i%2?'#9b3027':'#b23b2b')});
 // 旧货经营痕迹：纸箱、麻袋、搬运木托、红色手写价签（不拼造家具）
 function crate(x,z,s=1){const c=material('#735638');mesh(new THREE.BoxGeometry(.8*s,.58*s,.7*s),c,x,.29*s,z);for(let y=.12;y<.58;y+=.18)beam(x,y*s,z,.84*s,.035*s,.74*s,0,'#98734b')}
 function priceTag(x,y,z,text){const c=document.createElement('canvas');c.width=180;c.height=120;const g=c.getContext('2d');g.fillStyle='#b83c2b';g.fillRect(0,0,180,120);g.fillStyle='#f3dfb7';g.font='bold 38px serif';g.textAlign='center';g.fillText(text,90,73);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;const m=new THREE.MeshBasicMaterial({map:t,side:THREE.DoubleSide});mesh(new THREE.PlaneGeometry(.42,.28),m,x,y,z,0,0,0,false)}
@@ -143,6 +167,36 @@ function marketStall(x,z,side,variant=0){
  const rail=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,w,8),rusty);rail.rotation.z=Math.PI/2;rail.position.set(0,2.55,d/2+.12);g.add(rail);
  const bulb=new THREE.Mesh(new THREE.SphereGeometry(.09,10,8),new THREE.MeshBasicMaterial({color:0xffd49a}));bulb.position.set(0,2.55,d/2+.2);g.add(bulb);
  const lamp=new THREE.PointLight(0xffc78b,5,4);lamp.position.set(0,2.35,d/2+.12);g.add(lamp);
+ // 老式家居照片墙：每档挂两幅带木框的生活场景照片
+ function homePhoto(kind){
+  const c=document.createElement('canvas');c.width=420;c.height=300;const q=c.getContext('2d');
+  const bg=q.createLinearGradient(0,0,0,300);bg.addColorStop(0,'#d8c5a1');bg.addColorStop(1,'#80644a');q.fillStyle=bg;q.fillRect(0,0,420,300);
+  q.fillStyle='#b9a17c';q.fillRect(18,18,384,264);q.fillStyle='#d4c3a3';q.fillRect(32,30,356,238);
+  // 老房子的墙面、窗户和水磨石地面
+  q.fillStyle='#c8b18b';q.fillRect(34,32,352,154);q.fillStyle='#8c9a8b';q.fillRect(48,48,95,112);
+  q.strokeStyle='#5d4b38';q.lineWidth=8;q.strokeRect(48,48,95,112);q.beginPath();q.moveTo(95,48);q.lineTo(95,160);q.moveTo(48,104);q.lineTo(143,104);q.stroke();
+  q.fillStyle='#9b7d58';q.fillRect(34,190,352,72);
+  // 墙上挂钟与旧日历
+  q.fillStyle='#e8d8b5';q.fillRect(310,52,48,65);q.fillStyle='#9a3026';q.font='bold 24px serif';q.fillText('福',322,88);
+  q.beginPath();q.arc(250,78,22,0,Math.PI*2);q.fillStyle='#e2d3b5';q.fill();q.strokeStyle='#594532';q.lineWidth=4;q.stroke();
+  // 依主题绘制老式家具轮廓：木沙发、八仙桌或电视柜
+  q.fillStyle=kind%3===0?'#65452f':kind%3===1?'#765137':'#59402d';
+  if(kind%3===0){q.fillRect(88,150,190,48);q.fillRect(76,132,24,66);q.fillRect(266,132,24,66);q.fillRect(100,195,12,34);q.fillRect(254,195,12,34);q.fillStyle='#b18b62';q.fillRect(105,158,155,28)}
+  else if(kind%3===1){q.fillRect(105,178,180,18);q.fillRect(120,196,12,42);q.fillRect(260,196,12,42);q.fillRect(95,170,200,10)}
+  else{q.fillRect(94,158,210,58);q.fillRect(106,216,14,24);q.fillRect(278,216,14,24);q.fillStyle='#302b26';q.fillRect(138,168,118,42)}
+  // 胶片颗粒、泛黄边缘
+  for(let i=0;i<360;i++){q.fillStyle='rgba(70,48,27,'+(Math.random()*.09)+')';q.fillRect(Math.random()*420,Math.random()*300,1,1)}
+  q.strokeStyle='#ead7ae';q.lineWidth=9;q.strokeRect(5,5,410,290);
+  return new THREE.CanvasTexture(c);
+ }
+ for(let photo=0;photo<2;photo++){
+  const frame=new THREE.Group();frame.position.set(photo===0?-w*.23:w*.23,2.05,-d/2+.095);g.add(frame);
+  const woodFrame=new THREE.Mesh(new THREE.BoxGeometry(.94,.72,.09),material('#49301f'));frame.add(woodFrame);
+  const image=new THREE.Mesh(new THREE.PlaneGeometry(.82,.60),new THREE.MeshBasicMaterial({map:homePhoto(variant+photo),side:THREE.DoubleSide}));
+  image.position.z=.052;frame.add(image);
+  const glass=new THREE.Mesh(new THREE.PlaneGeometry(.82,.60),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.09,side:THREE.DoubleSide}));
+  glass.position.z=.058;frame.add(glass);
+ }
  // 摊位招牌
  const signCanvas=document.createElement('canvas');signCanvas.width=512;signCanvas.height=160;const ctx=signCanvas.getContext('2d');
  ctx.fillStyle=variant%2?'#4e3024':'#6d392b';ctx.fillRect(0,0,512,160);ctx.strokeStyle='#d2b78b';ctx.lineWidth=7;ctx.strokeRect(9,9,494,142);
