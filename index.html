@@ -13,6 +13,18 @@
 #hint{position:fixed;z-index:4;bottom:21px;left:50%;transform:translateX(-50%);color:#e1d3b6aa;font:10px sans-serif;letter-spacing:.16em;white-space:nowrap;text-shadow:0 2px 12px #000;pointer-events:none}
 #status{position:fixed;z-index:4;right:24px;top:25px;color:#c9b99b99;font:9px sans-serif;letter-spacing:.12em;pointer-events:none}
 @media(max-width:650px){#mark{top:15px;left:16px;font-size:17px}#hint{bottom:14px;font-size:9px}#status{top:17px;right:14px}}
+#interact{position:fixed;z-index:8;left:50%;bottom:62px;transform:translateX(-50%);padding:10px 16px;border:1px solid #d9c49a88;background:#201a14d9;color:#f0dfbd;font:13px/1.5 sans-serif;letter-spacing:.08em;display:none;pointer-events:none;box-shadow:0 8px 30px #0006}
+#stallCard{position:fixed;z-index:10;left:50%;top:50%;transform:translate(-50%,-50%);width:min(420px,calc(100vw - 34px));padding:25px 24px 22px;background:linear-gradient(145deg,#3c2b20f2,#211b16f5);border:1px solid #c5a87899;color:#ead9b8;box-shadow:0 22px 90px #0009;display:none}
+#stallCard.show{display:block;animation:arrive .22s ease-out}
+#stallCard .eyebrow{font:10px sans-serif;letter-spacing:.22em;color:#c49b68}
+#stallCard h2{font:26px serif;font-weight:400;margin:12px 0 9px}
+#stallCard p{font:13px/1.9 sans-serif;color:#d0c0a4;margin:0}
+#stallCard .sample{margin-top:18px;padding-top:14px;border-top:1px solid #bda07855;font:12px/1.9 sans-serif;color:#e8d7b8}
+#stallCard .close{margin-top:20px;color:#c6a77b;font:11px sans-serif;letter-spacing:.15em}
+@keyframes arrive{from{opacity:0;transform:translate(-50%,-46%)}to{opacity:1;transform:translate(-50%,-50%)}}
+#hint{bottom:18px}
+@media(max-width:650px){#interact{bottom:58px;font-size:12px}#stallCard{padding:21px 19px}}
+
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"}}</script>
 </head>
@@ -20,7 +32,9 @@
 <div id="scene"></div><div id="shade"></div><div id="grain"></div>
 <div id="mark">老物件集<small>一件家具，一段中国家庭的旧时光</small></div>
 <div id="status">旧木作 · 老家具 · 旧日常</div>
-<div id="hint">移动视线环顾 · 滚动穿过旧货铺 · 反向滚动返回</div>
+<div id="hint">W A S D / 方向键行走 · 靠近摊位按 E 看样品 · ESC 返回</div>
+<div id="interact">按 E 查看这家摊位的旧家具样品</div>
+<section id="stallCard"><div class="eyebrow">旧物集 · 摊位档案</div><h2 id="stallTitle">旧木家具</h2><p id="stallDesc"></p><div class="sample" id="stallSamples"></div><div class="close">按 ESC 继续逛集市</div></section>
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -173,15 +187,53 @@ for(let i=0;i<dustCount;i++){dustPos[i*3]=(Math.random()-.5)*15;dustPos[i*3+1]=M
 dustGeo.setAttribute('position',new THREE.BufferAttribute(dustPos,3));
 const dust=new THREE.Points(dustGeo,new THREE.PointsMaterial({color:'#e8d4ad',size:.025,transparent:true,opacity:.5,depthWrite:false}));scene.add(dust);
 
-let targetX=0,targetY=0,lookX=0,lookY=0,travel=0,lastTouch=0;
-window.addEventListener('pointermove',e=>{targetX=(e.clientX/innerWidth-.5)*.68;targetY=(e.clientY/innerHeight-.5)*.2});
-window.addEventListener('wheel',e=>{travel=THREE.MathUtils.clamp(travel+e.deltaY*.006,-1.5,16)},{passive:true});
-window.addEventListener('touchstart',e=>lastTouch=e.touches[0].clientY,{passive:true});
-window.addEventListener('touchmove',e=>{const y=e.touches[0].clientY;targetX=(e.touches[0].clientX/innerWidth-.5)*.5;travel=THREE.MathUtils.clamp(travel+(lastTouch-y)*.018,-1.5,16);lastTouch=y},{passive:true});
+
+// 第三人称逛集市：人物沿中央通道行走，镜头平滑跟随
+const player=new THREE.Group();scene.add(player);player.position.set(0,0,11.5);
+const skin=material('#bd8f69'),shirt=material('#526052'),pants=material('#34302a'),shoe=material('#241e19'),hair=material('#29221c');
+const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.27,.62,5,10),shirt);torso.position.y=1.22;torso.castShadow=true;player.add(torso);
+const head=new THREE.Mesh(new THREE.SphereGeometry(.205,16,12),skin);head.position.y=1.86;head.castShadow=true;player.add(head);
+const hairCap=new THREE.Mesh(new THREE.SphereGeometry(.21,16,8,0,Math.PI*2,0,Math.PI*.52),hair);hairCap.position.y=1.96;player.add(hairCap);
+const limbs=[];
+function limb(x,y,len,r,mat){const pivot=new THREE.Group();pivot.position.set(x,y,0);const part=new THREE.Mesh(new THREE.CapsuleGeometry(r,len,.0,8),mat);part.position.y=-len*.43;part.castShadow=true;pivot.add(part);player.add(pivot);limbs.push(pivot);return pivot}
+const armL=limb(-.34,1.48,.58,.085,shirt),armR=limb(.34,1.48,.58,.085,shirt);
+const legL=limb(-.14,.82,.68,.105,pants),legR=limb(.14,.82,.68,.105,pants);
+for(const leg of [legL,legR]){const foot=new THREE.Mesh(new THREE.BoxGeometry(.19,.12,.34),shoe);foot.position.set(0,-.31,-.07);leg.add(foot)}
+const stalls=[
+ {x:-3.25,z:4.2,title:'老木家具摊',desc:'这家摊主专收老榆木家具和旧木作，桌面有岁月留下的包浆，边角还能看到搬家磕碰的痕迹。',samples:'样品：中式老茶桌、木扶手椅、旧木案几。可以近距离查看木纹、结构与保存状态。'},
+ {x:3.25,z:-1.8,title:'搬家清仓摊',desc:'一户人家搬迁留下的旧家具，实用为主，不追求成套。',samples:'样品：旧皮沙发、茶桌、单人扶手椅。适合淘客厅组合。'},
+ {x:-3.25,z:-7.4,title:'桌椅茶几摊',desc:'各种家庭餐桌、边桌和单人椅混在一起，尺寸和风格各不相同。',samples:'样品：中式茶桌、老木扶手椅、旧皮沙发。'},
+ {x:3.25,z:-13.1,title:'旧货寄卖摊',desc:'附近居民寄卖的家具，每件物品都有不同的使用痕迹。',samples:'样品：茶桌、扶手椅、旧皮沙发。'},
+ {x:-3.25,z:-19.1,title:'老家具杂项摊',desc:'旧居改造时留下来的木器和零散家具，适合慢慢翻找。',samples:'样品：老木茶桌、木椅与旧案几。'},
+ {x:3.25,z:-24.5,title:'仓库尾货摊',desc:'集市最里面的清仓摊，家具摆放得更密，部分物件等待修补。',samples:'样品：旧木桌、沙发和单人椅。'}
+];
+let activeStall=-1,cardOpen=false;
+const interact=document.querySelector('#interact'),card=document.querySelector('#stallCard');
+function openStall(i){activeStall=i;cardOpen=true;document.querySelector('#stallTitle').textContent=stalls[i].title;document.querySelector('#stallDesc').textContent=stalls[i].desc;document.querySelector('#stallSamples').textContent=stalls[i].samples;card.classList.add('show');}
+function closeStall(){cardOpen=false;card.classList.remove('show')}
+const keys={};window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();keys[k]=true;if(k==='e'&&activeStall>=0&&!cardOpen)openStall(activeStall);if(k==='escape'&&cardOpen)closeStall()});
+window.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+let walkPhase=0,nearby=-1;
+function updatePlayer(dt,t){
+ if(!cardOpen){
+  let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0);
+  let dz=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
+  const moving=dx!==0||dz!==0;
+  if(moving){const l=Math.hypot(dx,dz);dx/=l;dz/=l;player.position.x=THREE.MathUtils.clamp(player.position.x+dx*dt*3.25,-3.85,3.85);player.position.z=THREE.MathUtils.clamp(player.position.z+dz*dt*3.25,-27,12.5);player.rotation.y=Math.atan2(dx,-dz);walkPhase+=dt*9;}
+  else walkPhase*=.84;
+  const swing=Math.sin(walkPhase)*.48;armL.rotation.x=swing;armR.rotation.x=-swing;legL.rotation.x=-swing;legR.rotation.x=swing;
+  torso.position.y=1.22+(moving?Math.abs(Math.sin(walkPhase))*.035:0);
+ }
+ nearby=-1;let best=2.25;
+ stalls.forEach((st,i)=>{const d=Math.hypot(player.position.x-st.x,player.position.z-st.z);if(d<best){best=d;nearby=i}});
+ activeStall=nearby;interact.style.display=nearby>=0&&!cardOpen?'block':'none';
+ const camTarget=new THREE.Vector3(player.position.x*.78,2.8,player.position.z+6.3);
+ camera.position.lerp(camTarget,1-Math.exp(-dt*4.2));
+ const look=new THREE.Vector3(player.position.x*.45,1.55,player.position.z-3.4);
+ camera.lookAt(look);
+}
 const clock=new THREE.Clock();
-function animate(){requestAnimationFrame(animate);const t=clock.getElapsedTime();lookX+=(targetX-lookX)*.035;lookY+=(targetY-lookY)*.035;
- camera.position.x=lookX*2.5;camera.position.y=2.15+lookY+Math.sin(t*.32)*.016;camera.position.z=14.2-travel;
- camera.lookAt(lookX*1.5,1.9+lookY*1.3,-6.8-travel*.82);
+function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;updatePlayer(dt,t);
  dust.rotation.y=Math.sin(t*.08)*.025;renderer.render(scene,camera)}
 animate();
 window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
