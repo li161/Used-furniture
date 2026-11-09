@@ -80,6 +80,65 @@ function crate(x,z,s=1){const c=material('#735638');mesh(new THREE.BoxGeometry(.
 function priceTag(x,y,z,text){const c=document.createElement('canvas');c.width=180;c.height=120;const g=c.getContext('2d');g.fillStyle='#b83c2b';g.fillRect(0,0,180,120);g.fillStyle='#f3dfb7';g.font='bold 38px serif';g.textAlign='center';g.fillText(text,90,73);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;const m=new THREE.MeshBasicMaterial({map:t,side:THREE.DoubleSide});mesh(new THREE.PlaneGeometry(.42,.28),m,x,y,z,0,0,0,false)}
 crate(-6.4,7.5,.9);crate(6.2,7.2,.85);crate(-6.4,-9,.9);crate(6.5,-16,.8);
 priceTag(-5.2,1.3,1.8,'旧木器');priceTag(5.8,1.55,-8.6,'可议价');priceTag(-5.9,1.1,-15.5,'老家具');
+
+// 独立旧货摊档：每档都有棚架、遮阳布、柜台、背架和手写招牌
+// 这里只用几何体搭建摊位建筑结构；家具陈列仍由真实模型资产承担
+function marketStall(x,z,side,variant=0){
+ const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=side>0?Math.PI/2:-Math.PI/2;scene.add(g);
+ const w=3.65+(variant%2)*.45,d=3.25+(variant%3)*.22;
+ const postMat=material(variant%2?'#493526':'#5a4030');
+ const canvasMats=[material('#8b6044'),material('#6f7460'),material('#9a7956'),material('#6f4d3a')];
+ const canopy=canvasMats[variant%canvasMats.length];
+ const rusty=material('#4b4940',.72,.48);
+ // 四角立柱与横梁
+ for(const lx of [-w/2,w/2])for(const lz of [-d/2,d/2]){
+  const p=new THREE.Mesh(new THREE.BoxGeometry(.13,3.05,.13),postMat);p.position.set(lx,1.52,lz);p.castShadow=true;p.receiveShadow=true;g.add(p);
+ }
+ const top=new THREE.Mesh(new THREE.BoxGeometry(w+.22,.16,d+.22),postMat);top.position.set(0,3.02,0);top.castShadow=true;g.add(top);
+ // 略微倾斜的旧帆布棚顶和前沿垂布
+ const roofMesh=new THREE.Mesh(new THREE.BoxGeometry(w+.42,.12,d+.48),canopy);roofMesh.position.set(0,3.18,0);roofMesh.rotation.x=-.045;roofMesh.castShadow=true;roofMesh.receiveShadow=true;g.add(roofMesh);
+ const valance=new THREE.Mesh(new THREE.BoxGeometry(w+.36,.48,.09),canopy);valance.position.set(0,2.88,d/2+.17);g.add(valance);
+ // 后墙、半高侧挡板，形成真正的摊位空间
+ const back=new THREE.Mesh(new THREE.BoxGeometry(w,2.15,.12),material('#665747'));back.position.set(0,1.12,-d/2);back.castShadow=true;g.add(back);
+ for(const lx of [-w/2,w/2]){
+  const sideWall=new THREE.Mesh(new THREE.BoxGeometry(.1,1.35,d*.7),material('#75634e'));sideWall.position.set(lx,.68,-d*.08);g.add(sideWall);
+ }
+ // 旧木柜台与下方堆货空间
+ const counter=new THREE.Mesh(new THREE.BoxGeometry(w*.84,.16,.78),material('#76583b'));counter.position.set(0,1.02,d*.28);counter.castShadow=true;g.add(counter);
+ const counterFront=new THREE.Mesh(new THREE.BoxGeometry(w*.84,.82,.1),material('#59432f'));counterFront.position.set(0,.53,d*.65);g.add(counterFront);
+ // 背部陈列架：层板、竖向分隔
+ for(const yy of [.9,1.65,2.35]){
+  const shelf=new THREE.Mesh(new THREE.BoxGeometry(w*.82,.09,.42),material('#806345'));shelf.position.set(0,yy,-d/2+.28);shelf.castShadow=true;g.add(shelf);
+ }
+ for(const lx of [-w*.34,0,w*.34]){
+  const divider=new THREE.Mesh(new THREE.BoxGeometry(.07,1.55,.38),postMat);divider.position.set(lx,1.62,-d/2+.28);g.add(divider);
+ }
+ // 摊位前沿金属管与灯泡
+ const rail=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,w,8),rusty);rail.rotation.z=Math.PI/2;rail.position.set(0,2.55,d/2+.12);g.add(rail);
+ const bulb=new THREE.Mesh(new THREE.SphereGeometry(.09,10,8),new THREE.MeshBasicMaterial({color:0xffd49a}));bulb.position.set(0,2.55,d/2+.2);g.add(bulb);
+ const lamp=new THREE.PointLight(0xffc78b,5,4);lamp.position.set(0,2.35,d/2+.12);g.add(lamp);
+ // 摊位招牌
+ const signCanvas=document.createElement('canvas');signCanvas.width=512;signCanvas.height=160;const ctx=signCanvas.getContext('2d');
+ ctx.fillStyle=variant%2?'#4e3024':'#6d392b';ctx.fillRect(0,0,512,160);ctx.strokeStyle='#d2b78b';ctx.lineWidth=7;ctx.strokeRect(9,9,494,142);
+ ctx.fillStyle='#f0dfbd';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 66px serif';
+ ctx.fillText(['旧木家具','搬家清仓','桌椅柜床','旧货寄卖'][variant%4],256,82);
+ const signTex=new THREE.CanvasTexture(signCanvas);signTex.colorSpace=THREE.SRGBColorSpace;
+ const sign=new THREE.Mesh(new THREE.PlaneGeometry(2.05,.64),new THREE.MeshBasicMaterial({map:signTex,side:THREE.DoubleSide}));
+ sign.position.set(0,2.72,d/2+.19);g.add(sign);
+ // 棚顶边缘的旧铁皮压条
+ for(const lx of [-w/2,w/2]){
+  const strip=new THREE.Mesh(new THREE.BoxGeometry(.045,.07,d+.35),rusty);strip.position.set(lx,3.24,0);g.add(strip);
+ }
+ return g;
+}
+// 左右错落布置摊档，入口处更开阔，越往里越密
+marketStall(-5.25,4.2,-1,0);
+marketStall(5.25,-1.8,1,1);
+marketStall(-5.3,-7.4,-1,2);
+marketStall(5.25,-13.1,1,3);
+marketStall(-5.2,-19.1,-1,1);
+marketStall(5.2,-24.5,1,2);
+
 // 中央留出曲折通道，家具模型在两侧形成高低错落的旧货山
 const loader=new GLTFLoader();
 const assets=[
