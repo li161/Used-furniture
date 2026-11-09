@@ -25,6 +25,17 @@
 #hint{bottom:18px}
 @media(max-width:650px){#interact{bottom:58px;font-size:12px}#stallCard{padding:21px 19px}}
 
+
+#furnitureCard{position:fixed;z-index:11;right:clamp(14px,4vw,54px);bottom:clamp(56px,9vh,92px);width:min(340px,calc(100vw - 28px));padding:20px 21px;background:linear-gradient(145deg,#3c2b20ed,#211b16f2);border:1px solid #c5a87899;color:#ead9b8;box-shadow:0 18px 70px #0009;display:none;pointer-events:none}
+#furnitureCard.show{display:block;animation:arrive .2s ease-out}
+#furnitureCard .eyebrow{font:10px sans-serif;letter-spacing:.2em;color:#c49b68}
+#furnitureCard h3{font:23px serif;font-weight:400;margin:9px 0}
+#furnitureCard p{font:12px/1.85 sans-serif;color:#d0c0a4;margin:0}
+#furnitureCard .close{margin-top:13px;color:#c6a77b;font:10px sans-serif;letter-spacing:.12em}
+#status.error{color:#ffb18b}
+#inspectTip{position:fixed;z-index:12;left:50%;top:22px;transform:translateX(-50%);display:none;color:#f0dfbd;background:#211b16c9;border:1px solid #c5a87877;padding:9px 14px;font:11px sans-serif;letter-spacing:.08em;white-space:nowrap;pointer-events:none}
+@media(max-width:650px){#furnitureCard{right:12px;bottom:60px;width:min(300px,calc(100vw - 24px));padding:16px}#inspectTip{top:64px;font-size:10px}}
+
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"}}</script>
 </head>
@@ -34,6 +45,7 @@
 <div id="status">旧木作 · 老家具 · 旧日常</div>
 <div id="hint">W A S D / 方向键行走 · 靠近摊位按 E 看样品 · ESC 返回</div>
 <div id="interact">按 E 查看这家摊位的旧家具样品</div>
+<section id="furnitureCard"><div class="eyebrow">旧物集 · 单件样品</div><h3 id="furnitureTitle">家具样品</h3><p id="furnitureDesc"></p><div class="close">拖动鼠标旋转 · 滚轮调整距离 · 按 ESC 返回</div></section><div id="inspectTip">正在查看家具 · 拖动旋转 · 滚轮缩放 · ESC 返回</div>
 <section id="stallCard"><div class="eyebrow">旧物集 · 摊位档案</div><h2 id="stallTitle">旧木家具</h2><p id="stallDesc"></p><div class="sample" id="stallSamples"></div><div class="close">按 ESC 继续逛集市</div></section>
 <script type="module">
 import * as THREE from 'three';
@@ -163,7 +175,7 @@ const assets=[
  {name:'雕花木沙发',era:'约1990—2000年（参考）',material:'木质雕花结构',condition:'局部磕碰',price:'¥380—880（示例）',url:'https://files.innerscene.com/library/victorian-carved-sofa-812af357/702f0a24fccb9531bad8/polyhaven-sofa-01.glb',width:2.45,positions:[[-4.35,4.95,.16],[6.15,-1.05,-.2],[-4.4,-6.65,.18],[6.15,-12.35,.16],[-4.3,-18.35,.18],[6.1,-23.75,.18]]},
  {name:'旧木案几',era:'约1980—2000年（参考）',material:'木质',condition:'表面旧化',price:'¥120—300（示例）',url:'https://files.innerscene.com/library/victorian-console-table-8d86c520/c206978e362f1a904176/polyhaven-classicconsole-01.glb',width:1.65,positions:[[-6.15,3.35,.05],[4.35,-2.65,-.12],[-6.2,-7.95,.08],[4.35,-13.65,.05],[-6.1,-19.65,.08],[4.3,-25.05,.08]]}
 ];
-let loaded=0,failed=0;const expected=assets.reduce((n,a)=>n+a.positions.length,0);
+let loaded=0,failed=0;const furnitureItems=[];const expected=assets.reduce((n,a)=>n+a.positions.length,0);
 function makeFurnitureTag(spec,pos,height){
  const c=document.createElement('canvas');c.width=640;c.height=360;const g=c.getContext('2d');
  g.fillStyle='#e8d7b5';g.fillRect(0,0,640,360);g.fillStyle='#6b3d2b';g.fillRect(0,0,640,68);
@@ -186,7 +198,9 @@ function place(root,spec,pos){
  const scaled=new THREE.Box3().setFromObject(model);model.position.y=-scaled.min.y;
  model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(Array.isArray(o.material))o.material.forEach(m=>{m.side=THREE.DoubleSide});else if(o.material)o.material.side=THREE.DoubleSide}});
  holder.add(model);
- makeFurnitureTag(spec,pos,scaled.getSize(new THREE.Vector3()).y);
+ const modelSize=scaled.getSize(new THREE.Vector3());
+ furnitureItems.push({holder,spec,center:new THREE.Vector3(pos[0],Math.max(.45,modelSize.y*.48),pos[1]),radius:Math.max(1.05,Math.min(2.0,Math.max(modelSize.x,modelSize.z)*.72))});
+ makeFurnitureTag(spec,pos,modelSize.y);
 }
 assets.forEach(spec=>loader.load(spec.url,gltf=>{
  spec.positions.forEach(p=>place(gltf.scene,spec,p));loaded+=spec.positions.length;
@@ -195,7 +209,7 @@ assets.forEach(spec=>loader.load(spec.url,gltf=>{
 },undefined,error=>{
  failed++;console.error('模型加载失败：'+spec.name,error);
  document.documentElement.dataset.assetError=String(failed);
- document.querySelector('#status').textContent='已加载 '+loaded+' 件 · '+failed+' 组资源失败';
+ document.querySelector('#status').textContent='家具资源异常 '+failed+' 组 · 已显示 '+loaded+' 件';document.querySelector('#status').classList.add('error');
 }));
 
 // 轻微漂浮尘埃，避免过度粒子化
@@ -224,11 +238,21 @@ const stalls=[
  {x:-3.25,z:-19.1,title:'老家具杂项摊',desc:'旧居改造时留下来的木器和零散家具，适合慢慢翻找。',samples:'样品：老木茶桌、木椅与旧案几。'},
  {x:3.25,z:-24.5,title:'仓库尾货摊',desc:'集市最里面的清仓摊，家具摆放得更密，部分物件等待修补。',samples:'样品：旧木桌、沙发和单人椅。'}
 ];
-let activeStall=-1,cardOpen=false;
+let activeStall=-1,cardOpen=false,inspectIndex=-1,inspectAngle=0,inspectDistance=3.4;
 const interact=document.querySelector('#interact'),card=document.querySelector('#stallCard');
+const furnitureCard=document.querySelector('#furnitureCard'),inspectTip=document.querySelector('#inspectTip');
+let nearbyFurniture=-1;
+function openFurniture(i){if(!furnitureItems[i])return;inspectIndex=i;cardOpen=true;furnitureCard.classList.add('show');inspectTip.style.display='block';const spec=furnitureItems[i].spec;document.querySelector('#furnitureTitle').textContent=spec.name;document.querySelector('#furnitureDesc').textContent='年代：'+spec.era+'\n材质：'+spec.material+'\n成色：'+spec.condition+'\n参考价格：'+spec.price;interact.style.display='none';}
+function closeFurniture(){inspectIndex=-1;cardOpen=false;furnitureCard.classList.remove('show');inspectTip.style.display='none';}
+let dragging=false,lastPointerX=0;
+renderer.domElement.addEventListener('pointerdown',e=>{if(inspectIndex>=0){dragging=true;lastPointerX=e.clientX;renderer.domElement.setPointerCapture(e.pointerId)}});
+renderer.domElement.addEventListener('pointermove',e=>{if(dragging&&inspectIndex>=0){inspectAngle+=(e.clientX-lastPointerX)*.009;lastPointerX=e.clientX}});
+renderer.domElement.addEventListener('pointerup',()=>dragging=false);
+renderer.domElement.addEventListener('pointercancel',()=>dragging=false);
+renderer.domElement.addEventListener('wheel',e=>{if(inspectIndex>=0){inspectDistance=THREE.MathUtils.clamp(inspectDistance+e.deltaY*.006,1.8,6.5);e.preventDefault()}},{passive:false});
 function openStall(i){activeStall=i;cardOpen=true;document.querySelector('#stallTitle').textContent=stalls[i].title;document.querySelector('#stallDesc').textContent=stalls[i].desc;document.querySelector('#stallSamples').textContent=stalls[i].samples;card.classList.add('show');}
 function closeStall(){cardOpen=false;card.classList.remove('show')}
-const keys={};window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();keys[k]=true;if(k==='e'&&activeStall>=0&&!cardOpen)openStall(activeStall);if(k==='escape'&&cardOpen)closeStall()});
+const keys={};window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();keys[k]=true;if(k==='e'&&!cardOpen){if(nearbyFurniture>=0)openFurniture(nearbyFurniture);else if(activeStall>=0)openStall(activeStall)}if(k==='escape'&&inspectIndex>=0)closeFurniture();else if(k==='escape'&&cardOpen)closeStall()});
 window.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
 let walkPhase=0,nearby=-1;
 function updatePlayer(dt,t){
@@ -243,11 +267,20 @@ function updatePlayer(dt,t){
  }
  nearby=-1;let best=2.25;
  stalls.forEach((st,i)=>{const d=Math.hypot(player.position.x-st.x,player.position.z-st.z);if(d<best){best=d;nearby=i}});
- activeStall=nearby;interact.style.display=nearby>=0&&!cardOpen?'block':'none';
- const camTarget=new THREE.Vector3(player.position.x*.78,2.8,player.position.z+6.3);
- camera.position.lerp(camTarget,1-Math.exp(-dt*4.2));
- const look=new THREE.Vector3(player.position.x*.45,1.55,player.position.z-3.4);
- camera.lookAt(look);
+ activeStall=nearby;
+ nearbyFurniture=-1;let itemBest=2.35;
+ furnitureItems.forEach((item,i)=>{const d=Math.hypot(player.position.x-item.center.x,player.position.z-item.center.z);if(d<itemBest){itemBest=d;nearbyFurniture=i}});
+ if(!cardOpen){if(nearbyFurniture>=0){const item=furnitureItems[nearbyFurniture];interact.textContent='按 E 近距离查看：'+item.spec.name;interact.style.display='block'}else if(nearby>=0){interact.textContent='按 E 查看这家摊位';interact.style.display='block'}else interact.style.display='none'}
+ if(inspectIndex>=0&&furnitureItems[inspectIndex]){
+  const item=furnitureItems[inspectIndex],target=item.center.clone();target.y+=.25;
+  const offset=new THREE.Vector3(Math.sin(inspectAngle)*inspectDistance,inspectDistance*.34,Math.cos(inspectAngle)*inspectDistance);
+  camera.position.lerp(target.clone().add(offset),1-Math.exp(-dt*4.5));camera.lookAt(target);
+ }else{
+  const camTarget=new THREE.Vector3(player.position.x*.78,2.8,player.position.z+6.3);
+  camera.position.lerp(camTarget,1-Math.exp(-dt*4.2));
+  const look=new THREE.Vector3(player.position.x*.45,1.55,player.position.z-3.4);
+  camera.lookAt(look);
+ }
 }
 const clock=new THREE.Clock();
 function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;updatePlayer(dt,t);
