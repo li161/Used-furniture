@@ -157,11 +157,11 @@ marketStall(5.2,-24.5,1,2);
 // 中央留出曲折通道，家具模型在两侧形成高低错落的旧货山
 const loader=new GLTFLoader();
 const assets=[
- {name:'中式老茶桌',era:'约1980—2000年（参考）',material:'木质',condition:'有使用痕迹',price:'¥180—380（示例）',url:'https://files.innerscene.com/library/chinese-tea-table-a34cc5dd/5a435ea630e6f8e16e44/polyhaven-chinese-tea-table.glb',width:1.15,positions:[[-3.7,5.8,.28],[3.9,-5.5,-.18],[-3.4,-15.8,.2],[3.6,-23,.1],[-5.15,4.2,.1],[5.15,-1.8,.1],[-5.2,-7.4,.1],[5.2,-13.1,.1],[-5.15,-19.1,.1],[5.15,-24.5,.1]]},
- {name:'旧皮沙发',era:'约2000年前后（参考）',material:'皮革包覆、木质框架（示意）',condition:'局部磨损',price:'¥260—680（示例）',url:'https://files.innerscene.com/library/victorian-leather-sofa-3a3ebd7e/5e875109d66562a32c61/polyhaven-sofa-03.glb',width:2.65,positions:[[-4.8,1.6,.12],[4.7,-9.2,-.15],[-4.7,-19,.18],[5.2,-1.8,Math.PI/2],[-5.2,-7.4,Math.PI/2]]},
- {name:'老木扶手椅',era:'约1980—2000年（参考）',material:'木质框架',condition:'漆面有磨损',price:'¥80—220（示例）',url:'https://files.innerscene.com/library/victorian-armchair-f000c44f/a2ca475762c8930d0da6/polyhaven-armchair-01.glb',width:1.05,positions:[[3.1,3.6,-.18],[-3.2,-3.8,.22],[3.2,-13.4,.12],[-3.1,-22,.3],[-4.55,3.35,.3],[5.8,-1.8,2.1],[-5.85,-7.4,.3],[4.6,-12.4,2.1],[-4.55,-19.1,.3],[5.8,-24.5,2.1]]},
- {name:'雕花木沙发',era:'约1990—2000年（参考）',material:'木质雕花结构',condition:'局部磕碰',price:'¥380—880（示例）',url:'https://files.innerscene.com/library/victorian-carved-sofa-812af357/702f0a24fccb9531bad8/polyhaven-sofa-01.glb',width:2.45,positions:[[4.7,7.5,.16],[-4.8,-10.8,-.2],[4.8,-25,.18]]},
- {name:'旧木案几',era:'约1980—2000年（参考）',material:'木质',condition:'表面旧化',price:'¥120—300（示例）',url:'https://files.innerscene.com/library/victorian-console-table-8d86c520/c206978e362f1a904176/polyhaven-classicconsole-01.glb',width:1.65,positions:[[-5.8,8.2,.05],[5.8,-2.5,-.12],[-5.8,-25,.08]]}
+ {name:'中式老茶桌',era:'约1980—2000年（参考）',material:'木质',condition:'有使用痕迹',price:'¥180—380（示例）',url:'https://files.innerscene.com/library/chinese-tea-table-a34cc5dd/5a435ea630e6f8e16e44/polyhaven-chinese-tea-table.glb',width:1.15,positions:[[-5.25,4.2,.1],[5.25,-1.8,.1],[-5.3,-7.4,.1],[5.25,-13.1,.1],[-5.2,-19.1,.1],[5.2,-24.5,.1]]},
+ {name:'旧皮沙发',era:'约2000年前后（参考）',material:'皮革包覆、木质框架（示意）',condition:'局部磨损',price:'¥260—680（示例）',url:'https://files.innerscene.com/library/victorian-leather-sofa-3a3ebd7e/5e875109d66562a32c61/polyhaven-sofa-03.glb',width:2.65,positions:[[-5.25,3.05,.12],[5.25,-2.95,-.15],[-5.3,-8.55,.18],[5.25,-14.25,Math.PI/2],[-5.2,-20.25,.18],[5.2,-25.65,.18]]},
+ {name:'老木扶手椅',era:'约1980—2000年（参考）',material:'木质框架',condition:'漆面有磨损',price:'¥80—220（示例）',url:'https://files.innerscene.com/library/victorian-armchair-f000c44f/a2ca475762c8930d0da6/polyhaven-armchair-01.glb',width:1.05,positions:[[-6.15,4.95,.3], [4.35,-1.05,.3],[-6.2,-6.65,.3],[4.35,-12.35,.3],[-6.1,-18.35,.3],[4.3,-23.75,.3]]},
+ {name:'雕花木沙发',era:'约1990—2000年（参考）',material:'木质雕花结构',condition:'局部磕碰',price:'¥380—880（示例）',url:'https://files.innerscene.com/library/victorian-carved-sofa-812af357/702f0a24fccb9531bad8/polyhaven-sofa-01.glb',width:2.45,positions:[[-4.35,4.95,.16],[6.15,-1.05,-.2],[-4.4,-6.65,.18],[6.15,-12.35,.16],[-4.3,-18.35,.18],[6.1,-23.75,.18]]},
+ {name:'旧木案几',era:'约1980—2000年（参考）',material:'木质',condition:'表面旧化',price:'¥120—300（示例）',url:'https://files.innerscene.com/library/victorian-console-table-8d86c520/c206978e362f1a904176/polyhaven-classicconsole-01.glb',width:1.65,positions:[[-6.15,3.35,.05],[4.35,-2.65,-.12],[-6.2,-7.95,.08],[4.35,-13.65,.05],[-6.1,-19.65,.08],[4.3,-25.05,.08]]}
 ];
 let loaded=0,failed=0;const expected=assets.reduce((n,a)=>n+a.positions.length,0);
 function makeFurnitureTag(spec,pos,height){
@@ -236,7 +236,7 @@ function updatePlayer(dt,t){
   let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0);
   let dz=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
   const moving=dx!==0||dz!==0;
-  if(moving){const l=Math.hypot(dx,dz);dx/=l;dz/=l;player.position.x=THREE.MathUtils.clamp(player.position.x+dx*dt*3.25,-3.85,3.85);player.position.z=THREE.MathUtils.clamp(player.position.z+dz*dt*3.25,-27,12.5);player.rotation.y=Math.atan2(dx,-dz);walkPhase+=dt*9;}
+  if(moving){const l=Math.hypot(dx,dz);dx/=l;dz/=l;player.position.x=THREE.MathUtils.clamp(player.position.x+dx*dt*3.25,-7.15,7.15);player.position.z=THREE.MathUtils.clamp(player.position.z+dz*dt*3.25,-27,12.5);player.rotation.y=Math.atan2(dx,-dz);walkPhase+=dt*9;}
   else walkPhase*=.84;
   const swing=Math.sin(walkPhase)*.48;armL.rotation.x=swing;armR.rotation.x=-swing;legL.rotation.x=-swing;legR.rotation.x=swing;
   torso.position.y=1.22+(moving?Math.abs(Math.sin(walkPhase))*.035:0);
