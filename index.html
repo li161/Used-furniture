@@ -283,7 +283,42 @@ const limbs=[];
 function limb(x,y,len,r,mat){const pivot=new THREE.Group();pivot.position.set(x,y,0);const part=new THREE.Mesh(new THREE.CapsuleGeometry(r,len,.0,8),mat);part.position.y=-len*.43;part.castShadow=true;pivot.add(part);player.add(pivot);limbs.push(pivot);return pivot}
 const armL=limb(-.34,1.48,.58,.085,shirt),armR=limb(.34,1.48,.58,.085,shirt);
 const legL=limb(-.14,.82,.68,.105,pants),legR=limb(.14,.82,.68,.105,pants);
-for(const leg of [legL,legR]){const foot=new THREE.Mesh(new THREE.BoxGeometry(.19,.12,.34),shoe);foot.position.set(0,-.31,-.07);leg.add(foot)}
+for(const leg of [legL,legR]){const foot=new THREE.Mesh(new THREE.BoxGeometry(.19,.12,.34),shoe);foot.position.set(0,-.31,-.07);foot.castShadow=true;leg.add(foot)}
+// 人物升级：有层次的旧城逛市穿搭、五官、帽子、斜挎帆布包与衣物细节
+const jacket=material('#76533a'),jacketDark=material('#4b3528'),knit=material('#d1b995'),denim=material('#343d40'),leather=material('#4a3022'),canvas=material('#b69a70'),metalTrim=material('#b28a51');
+const neck=new THREE.Mesh(new THREE.CylinderGeometry(.09,.105,.18,12),skin);neck.position.y=1.72;player.add(neck);
+const inner=new THREE.Mesh(new THREE.CapsuleGeometry(.205,.55,4,10),knit);inner.position.set(0,1.22,-.018);inner.scale.set(.82,1,.88);player.add(inner);
+const coat=new THREE.Mesh(new THREE.CapsuleGeometry(.292,.64,5,12),jacket);coat.position.set(0,1.22,-.035);coat.castShadow=true;player.add(coat);
+const hem=new THREE.Mesh(new THREE.BoxGeometry(.49,.12,.29),jacketDark);hem.position.set(0,.91,-.025);player.add(hem);
+const collarL=new THREE.Mesh(new THREE.BoxGeometry(.14,.23,.055),knit);collarL.position.set(-.105,1.55,-.205);collarL.rotation.z=-.22;collarL.rotation.x=-.18;player.add(collarL);
+const collarR=collarL.clone();collarR.position.x=.105;collarR.rotation.z=.22;player.add(collarR);
+for(let i=0;i<4;i++){const b=new THREE.Mesh(new THREE.SphereGeometry(.022,8,8),metalTrim);b.position.set(.025,1.42-i*.13,-.294);player.add(b)}
+for(const x of [-.19,.19]){const pocket=new THREE.Mesh(new THREE.BoxGeometry(.13,.14,.025),jacketDark);pocket.position.set(x,1.27,-.276);player.add(pocket);const flap=new THREE.Mesh(new THREE.BoxGeometry(.15,.045,.035),jacket);flap.position.set(x,1.35,-.29);player.add(flap)}
+// 帽子：旧式鸭舌帽，帽檐朝人物前方
+const cap=new THREE.Mesh(new THREE.SphereGeometry(.225,18,10,0,Math.PI*2,0,Math.PI*.52),jacketDark);cap.position.set(0,2.025,0);cap.scale.set(1.06,.62,1.04);player.add(cap);
+const brim=new THREE.Mesh(new THREE.SphereGeometry(.19,16,8,0,Math.PI*2,0,Math.PI*.5),jacketDark);brim.position.set(0,1.99,-.145);brim.scale.set(1,.12,.72);player.add(brim);
+const capBadge=new THREE.Mesh(new THREE.CircleGeometry(.045,16),metalTrim);capBadge.position.set(0,2.015,-.213);player.add(capBadge);
+// 眼睛、眉毛、鼻子和耳朵，朝向行走前方（-Z）
+const eyeWhite=material('#eadfca'),eyeDark=material('#28231e');
+for(const x of [-.075,.075]){
+ const eye=new THREE.Mesh(new THREE.SphereGeometry(.027,10,8),eyeWhite);eye.position.set(x,1.865,-.188);eye.scale.set(1,.82,.5);player.add(eye);
+ const pupil=new THREE.Mesh(new THREE.SphereGeometry(.013,8,8),eyeDark);pupil.position.set(x,1.865,-.207);player.add(pupil);
+ const brow=new THREE.Mesh(new THREE.BoxGeometry(.065,.012,.018),hair);brow.position.set(x,1.916,-.19);brow.rotation.z=x<0?-.12:.12;player.add(brow);
+}
+const nose=new THREE.Mesh(new THREE.SphereGeometry(.027,8,8),skin);nose.position.set(0,1.82,-.205);nose.scale.set(.8,.8,.8);player.add(nose);
+for(const x of [-.205,.205]){const ear=new THREE.Mesh(new THREE.SphereGeometry(.052,10,8),skin);ear.position.set(x,1.85,0);ear.scale.set(.65,1,.65);player.add(ear)}
+// 帆布斜挎包：包体在人物右后侧，肩带跨过胸前
+const bag=new THREE.Mesh(new THREE.BoxGeometry(.34,.4,.16),canvas);bag.position.set(.28,.77,.18);bag.rotation.z=-.12;bag.castShadow=true;player.add(bag);
+const bagFlap=new THREE.Mesh(new THREE.BoxGeometry(.35,.13,.18),leather);bagFlap.position.set(.28,.98,.17);player.add(bagFlap);
+const bagSeam=new THREE.Mesh(new THREE.BoxGeometry(.24,.012,.012),metalTrim);bagSeam.position.set(.28,.97,.075);player.add(bagSeam);
+const strap=new THREE.Mesh(new THREE.TorusGeometry(.31,.027,6,28,Math.PI*1.03),leather);strap.position.set(-.015,1.22,-.17);strap.rotation.z=-.55;strap.rotation.x=Math.PI/2;player.add(strap);
+// 手掌与袖口，让手臂不再像单纯胶囊
+for(const arm of [armL,armR]){
+ const cuff=new THREE.Mesh(new THREE.CylinderGeometry(.09,.09,.095,10),jacketDark);cuff.position.y=-.48;arm.add(cuff);
+ const hand=new THREE.Mesh(new THREE.SphereGeometry(.085,12,10),skin);hand.position.y=-.59;hand.scale.set(.82,1,.72);arm.add(hand);
+}
+// 旧帆布围巾尾端，增加行走时的轮廓层次
+const scarf=new THREE.Mesh(new THREE.BoxGeometry(.13,.34,.045),material('#a84c35'));scarf.position.set(.13,1.42,.19);scarf.rotation.z=-.18;player.add(scarf);
 const stalls=[
  {x:-3.25,z:4.2,title:'老木家具摊',desc:'这家摊主专收老榆木家具和旧木作，桌面有岁月留下的包浆，边角还能看到搬家磕碰的痕迹。',samples:'样品：中式老茶桌、木扶手椅、旧木案几。可以近距离查看木纹、结构与保存状态。'},
  {x:3.25,z:-1.8,title:'搬家清仓摊',desc:'一户人家搬迁留下的旧家具，实用为主，不追求成套。',samples:'样品：旧皮沙发、茶桌、单人扶手椅。适合淘客厅组合。'},
