@@ -13,7 +13,7 @@
 #hint{position:fixed;z-index:4;bottom:21px;left:50%;transform:translateX(-50%);color:#e1d3b6aa;font:10px sans-serif;letter-spacing:.16em;white-space:nowrap;text-shadow:0 2px 12px #000;pointer-events:none}
 #status{position:fixed;z-index:4;right:24px;top:25px;color:#c9b99b99;font:9px sans-serif;letter-spacing:.12em;pointer-events:none}
 @media(max-width:650px){#mark{top:15px;left:16px;font-size:17px}#hint{bottom:14px;font-size:9px}#status{top:17px;right:14px}}
-#interact{position:fixed;z-index:8;left:50%;bottom:62px;transform:translateX(-50%);padding:10px 16px;border:1px solid #d9c49a88;background:#201a14d9;color:#f0dfbd;font:13px/1.5 sans-serif;letter-spacing:.08em;display:none;pointer-events:none;box-shadow:0 8px 30px #0006}
+#interact{position:fixed;z-index:8;left:50%;bottom:62px;transform:translateX(-50%);padding:10px 16px;border:1px solid #d9c49a88;background:#201a14d9;color:#f0dfbd;font:13px/1.5 sans-serif;letter-spacing:.08em;display:none;pointer-events:auto;cursor:pointer;user-select:none;box-shadow:0 8px 30px #0006}
 #stallCard{position:fixed;z-index:10;left:50%;top:50%;transform:translate(-50%,-50%);width:min(420px,calc(100vw - 34px));padding:25px 24px 22px;background:linear-gradient(145deg,#3c2b20f2,#211b16f5);border:1px solid #c5a87899;color:#ead9b8;box-shadow:0 22px 90px #0009;display:none}
 #stallCard.show{display:block;animation:arrive .22s ease-out}
 #stallCard .eyebrow{font:10px sans-serif;letter-spacing:.22em;color:#c49b68}
@@ -44,8 +44,8 @@
 <div id="mark">老物件集<small>一件家具，一段中国家庭的旧时光</small></div>
 <div id="status">旧木作 · 老家具 · 旧日常</div>
 <div id="hint">W A S D / 方向键行走 · 靠近摊位按 E 看样品 · ESC 返回</div>
-<div id="interact">按 E 查看这家摊位的旧家具样品</div>
-<section id="furnitureCard"><div class="eyebrow">旧物集 · 单件样品</div><h3 id="furnitureTitle">家具样品</h3><p id="furnitureDesc"></p><div class="close">拖动鼠标旋转 · 滚轮调整距离 · 按 ESC 返回</div></section><div id="inspectTip">正在查看家具 · 拖动旋转 · 滚轮缩放 · ESC 返回</div>
+<div id="interact">靠近家具，点击查看</div>
+<section id="furnitureCard"><div class="eyebrow">旧物集 · 单件样品</div><h3 id="furnitureTitle">家具样品</h3><p id="furnitureDesc"></p><div class="close">拖动旋转 · 滚轮缩放 · ESC 返回</div></section><div id="inspectTip">正在查看家具 · 拖动旋转 · 滚轮缩放 · ESC 返回</div>
 <section id="stallCard"><div class="eyebrow">旧物集 · 摊位档案</div><h2 id="stallTitle">旧木家具</h2><p id="stallDesc"></p><div class="sample" id="stallSamples"></div><div class="close">按 ESC 继续逛集市</div></section>
 <script type="module">
 import * as THREE from 'three';
@@ -246,13 +246,27 @@ function openFurniture(i){if(!furnitureItems[i])return;inspectIndex=i;cardOpen=t
 function closeFurniture(){inspectIndex=-1;cardOpen=false;furnitureCard.classList.remove('show');inspectTip.style.display='none';}
 let dragging=false,lastPointerX=0;
 renderer.domElement.addEventListener('pointerdown',e=>{if(inspectIndex>=0){dragging=true;lastPointerX=e.clientX;renderer.domElement.setPointerCapture(e.pointerId)}});
+interact.addEventListener('click',()=>{if(nearbyFurniture>=0)openFurniture(nearbyFurniture);else if(activeStall>=0)openStall(activeStall)});
+const furnitureRaycaster=new THREE.Raycaster(),furniturePointer=new THREE.Vector2();
+renderer.domElement.addEventListener('click',e=>{
+ if(inspectIndex>=0||nearbyFurniture<0)return;
+ const rect=renderer.domElement.getBoundingClientRect();
+ furniturePointer.set(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1);
+ furnitureRaycaster.setFromCamera(furniturePointer,camera);
+ const hits=furnitureRaycaster.intersectObjects(furnitureItems.map(item=>item.holder),true);
+ if(!hits.length)return;
+ let node=hits[0].object;
+ while(node&&!furnitureItems.some(item=>item.holder===node))node=node.parent;
+ const index=furnitureItems.findIndex(item=>item.holder===node);
+ if(index>=0){const item=furnitureItems[index];if(Math.hypot(player.position.x-item.center.x,player.position.z-item.center.z)<3.1)openFurniture(index)}
+});
 renderer.domElement.addEventListener('pointermove',e=>{if(dragging&&inspectIndex>=0){inspectAngle+=(e.clientX-lastPointerX)*.009;lastPointerX=e.clientX}});
 renderer.domElement.addEventListener('pointerup',()=>dragging=false);
 renderer.domElement.addEventListener('pointercancel',()=>dragging=false);
 renderer.domElement.addEventListener('wheel',e=>{if(inspectIndex>=0){inspectDistance=THREE.MathUtils.clamp(inspectDistance+e.deltaY*.006,1.8,6.5);e.preventDefault()}},{passive:false});
 function openStall(i){activeStall=i;cardOpen=true;document.querySelector('#stallTitle').textContent=stalls[i].title;document.querySelector('#stallDesc').textContent=stalls[i].desc;document.querySelector('#stallSamples').textContent=stalls[i].samples;card.classList.add('show');}
 function closeStall(){cardOpen=false;card.classList.remove('show')}
-const keys={};window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();keys[k]=true;if(k==='e'&&!cardOpen){if(nearbyFurniture>=0)openFurniture(nearbyFurniture);else if(activeStall>=0)openStall(activeStall)}if(k==='escape'&&inspectIndex>=0)closeFurniture();else if(k==='escape'&&cardOpen)closeStall()});
+const keys={};window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();keys[k]=true;if(k==='escape'&&inspectIndex>=0)closeFurniture();else if(k==='escape'&&cardOpen)closeStall()});
 window.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
 let walkPhase=0,nearby=-1;
 function updatePlayer(dt,t){
@@ -270,7 +284,7 @@ function updatePlayer(dt,t){
  activeStall=nearby;
  nearbyFurniture=-1;let itemBest=2.35;
  furnitureItems.forEach((item,i)=>{const d=Math.hypot(player.position.x-item.center.x,player.position.z-item.center.z);if(d<itemBest){itemBest=d;nearbyFurniture=i}});
- if(!cardOpen){if(nearbyFurniture>=0){const item=furnitureItems[nearbyFurniture];interact.textContent='按 E 近距离查看：'+item.spec.name;interact.style.display='block'}else if(nearby>=0){interact.textContent='按 E 查看这家摊位';interact.style.display='block'}else interact.style.display='none'}
+ if(!cardOpen){if(nearbyFurniture>=0){const item=furnitureItems[nearbyFurniture];interact.textContent='点击查看 · '+item.spec.name;interact.style.display='block'}else if(nearby>=0){interact.textContent='点击查看摊位样品';interact.style.display='block'}else interact.style.display='none'}
  if(inspectIndex>=0&&furnitureItems[inspectIndex]){
   const item=furnitureItems[inspectIndex],target=item.center.clone();target.y+=.25;
   const offset=new THREE.Vector3(Math.sin(inspectAngle)*inspectDistance,inspectDistance*.34,Math.cos(inspectAngle)*inspectDistance);
