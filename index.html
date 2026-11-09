@@ -135,9 +135,10 @@ function marketStall(x,z,side,variant=0){
  const signCanvas=document.createElement('canvas');signCanvas.width=512;signCanvas.height=160;const ctx=signCanvas.getContext('2d');
  ctx.fillStyle=variant%2?'#4e3024':'#6d392b';ctx.fillRect(0,0,512,160);ctx.strokeStyle='#d2b78b';ctx.lineWidth=7;ctx.strokeRect(9,9,494,142);
  ctx.fillStyle='#f0dfbd';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 66px serif';
- ctx.fillText(['旧木家具','搬家清仓','桌椅柜床','旧货寄卖'][variant%4],256,82);
+ ctx.fillText(['老木桌椅','搬家清仓','柜床茶几','居民寄卖'][variant%4],256,67);
+ ctx.font='28px sans-serif';ctx.fillText(['木桌·木椅·案几','沙发·茶桌·单椅','木柜·茶几·旧桌','每件旧物单独标价'][variant%4],256,125);
  const signTex=new THREE.CanvasTexture(signCanvas);signTex.colorSpace=THREE.SRGBColorSpace;
- const sign=new THREE.Mesh(new THREE.PlaneGeometry(2.05,.64),new THREE.MeshBasicMaterial({map:signTex,side:THREE.DoubleSide}));
+ const sign=new THREE.Mesh(new THREE.PlaneGeometry(2.55,.8),new THREE.MeshBasicMaterial({map:signTex,side:THREE.DoubleSide}));
  sign.position.set(0,2.72,d/2+.19);g.add(sign);
  // 棚顶边缘的旧铁皮压条
  for(const lx of [-w/2,w/2]){
@@ -156,13 +157,28 @@ marketStall(5.2,-24.5,1,2);
 // 中央留出曲折通道，家具模型在两侧形成高低错落的旧货山
 const loader=new GLTFLoader();
 const assets=[
- {name:'中式老茶桌',url:'https://files.innerscene.com/library/chinese-tea-table-a34cc5dd/5a435ea630e6f8e16e44/polyhaven-chinese-tea-table.glb',width:1.15,positions:[[-3.7,5.8,.28],[3.9,-5.5,-.18],[-3.4,-15.8,.2],[3.6,-23,.1],[-5.15,4.2,.1],[5.15,-1.8,.1],[-5.2,-7.4,.1],[5.2,-13.1,.1],[-5.15,-19.1,.1],[5.15,-24.5,.1]]},
- {name:'旧皮沙发',url:'https://files.innerscene.com/library/victorian-leather-sofa-3a3ebd7e/5e875109d66562a32c61/polyhaven-sofa-03.glb',width:2.65,positions:[[-4.8,1.6,.12],[4.7,-9.2,-.15],[-4.7,-19,.18],[5.2,-1.8,Math.PI/2],[-5.2,-7.4,Math.PI/2]]},
- {name:'老木扶手椅',url:'https://files.innerscene.com/library/victorian-armchair-f000c44f/a2ca475762c8930d0da6/polyhaven-armchair-01.glb',width:1.05,positions:[[3.1,3.6,-.18],[-3.2,-3.8,.22],[3.2,-13.4,.12],[-3.1,-22,.3],[-4.55,3.35,.3],[5.8,-1.8,2.1],[-5.85,-7.4,.3],[4.6,-12.4,2.1],[-4.55,-19.1,.3],[5.8,-24.5,2.1]]},
- {name:'雕花木沙发',url:'https://files.innerscene.com/library/victorian-carved-sofa-812af357/702f0a24fccb9531bad8/polyhaven-sofa-01.glb',width:2.45,positions:[[4.7,7.5,.16],[-4.8,-10.8,-.2],[4.8,-25,.18]]},
- {name:'旧木案几',url:'https://files.innerscene.com/library/victorian-console-table-8d86c520/c206978e362f1a904176/polyhaven-classicconsole-01.glb',width:1.65,positions:[[-5.8,8.2,.05],[5.8,-2.5,-.12],[-5.8,-25,.08]]}
+ {name:'中式老茶桌',era:'约1980—2000年（参考）',material:'木质',condition:'有使用痕迹',price:'¥180—380（示例）',url:'https://files.innerscene.com/library/chinese-tea-table-a34cc5dd/5a435ea630e6f8e16e44/polyhaven-chinese-tea-table.glb',width:1.15,positions:[[-3.7,5.8,.28],[3.9,-5.5,-.18],[-3.4,-15.8,.2],[3.6,-23,.1],[-5.15,4.2,.1],[5.15,-1.8,.1],[-5.2,-7.4,.1],[5.2,-13.1,.1],[-5.15,-19.1,.1],[5.15,-24.5,.1]]},
+ {name:'旧皮沙发',era:'约2000年前后（参考）',material:'皮革包覆、木质框架（示意）',condition:'局部磨损',price:'¥260—680（示例）',url:'https://files.innerscene.com/library/victorian-leather-sofa-3a3ebd7e/5e875109d66562a32c61/polyhaven-sofa-03.glb',width:2.65,positions:[[-4.8,1.6,.12],[4.7,-9.2,-.15],[-4.7,-19,.18],[5.2,-1.8,Math.PI/2],[-5.2,-7.4,Math.PI/2]]},
+ {name:'老木扶手椅',era:'约1980—2000年（参考）',material:'木质框架',condition:'漆面有磨损',price:'¥80—220（示例）',url:'https://files.innerscene.com/library/victorian-armchair-f000c44f/a2ca475762c8930d0da6/polyhaven-armchair-01.glb',width:1.05,positions:[[3.1,3.6,-.18],[-3.2,-3.8,.22],[3.2,-13.4,.12],[-3.1,-22,.3],[-4.55,3.35,.3],[5.8,-1.8,2.1],[-5.85,-7.4,.3],[4.6,-12.4,2.1],[-4.55,-19.1,.3],[5.8,-24.5,2.1]]},
+ {name:'雕花木沙发',era:'约1990—2000年（参考）',material:'木质雕花结构',condition:'局部磕碰',price:'¥380—880（示例）',url:'https://files.innerscene.com/library/victorian-carved-sofa-812af357/702f0a24fccb9531bad8/polyhaven-sofa-01.glb',width:2.45,positions:[[4.7,7.5,.16],[-4.8,-10.8,-.2],[4.8,-25,.18]]},
+ {name:'旧木案几',era:'约1980—2000年（参考）',material:'木质',condition:'表面旧化',price:'¥120—300（示例）',url:'https://files.innerscene.com/library/victorian-console-table-8d86c520/c206978e362f1a904176/polyhaven-classicconsole-01.glb',width:1.65,positions:[[-5.8,8.2,.05],[5.8,-2.5,-.12],[-5.8,-25,.08]]}
 ];
 let loaded=0,failed=0;const expected=assets.reduce((n,a)=>n+a.positions.length,0);
+function makeFurnitureTag(spec,pos,height){
+ const c=document.createElement('canvas');c.width=640;c.height=360;const g=c.getContext('2d');
+ g.fillStyle='#e8d7b5';g.fillRect(0,0,640,360);g.fillStyle='#6b3d2b';g.fillRect(0,0,640,68);
+ g.strokeStyle='#9b7950';g.lineWidth=10;g.strokeRect(9,9,622,342);
+ g.fillStyle='#fff0d0';g.font='bold 34px serif';g.textAlign='center';g.fillText('旧货实物价签',320,46);
+ g.fillStyle='#38291e';g.textAlign='left';g.font='bold 43px serif';g.fillText(spec.name,34,127);
+ g.font='27px sans-serif';g.fillText('年代参考：'+spec.era,34,184);
+ g.fillText('材质：'+spec.material,34,230);
+ g.fillText('成色：'+spec.condition,34,276);
+ g.fillStyle='#9b3024';g.font='bold 34px serif';g.fillText('示例价 '+spec.price,34,326);
+ const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;
+ const tag=new THREE.Mesh(new THREE.PlaneGeometry(1.12,.63),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));
+ tag.position.set(pos[0]+(pos[0]<0?.62:-.62),Math.max(1.05,height+.38),pos[1]+.62);
+ tag.rotation.y=pos[0]<0?Math.PI/2:-Math.PI/2;scene.add(tag);
+}
 function place(root,spec,pos){
  const holder=new THREE.Group();holder.position.set(pos[0],0,pos[1]);holder.rotation.y=pos[2];scene.add(holder);
  const model=root.clone(true);const b=new THREE.Box3().setFromObject(model);const size=b.getSize(new THREE.Vector3());
@@ -170,6 +186,7 @@ function place(root,spec,pos){
  const scaled=new THREE.Box3().setFromObject(model);model.position.y=-scaled.min.y;
  model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(Array.isArray(o.material))o.material.forEach(m=>{m.side=THREE.DoubleSide});else if(o.material)o.material.side=THREE.DoubleSide}});
  holder.add(model);
+ makeFurnitureTag(spec,pos,scaled.getSize(new THREE.Vector3()).y);
 }
 assets.forEach(spec=>loader.load(spec.url,gltf=>{
  spec.positions.forEach(p=>place(gltf.scene,spec,p));loaded+=spec.positions.length;
