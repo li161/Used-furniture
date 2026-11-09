@@ -275,7 +275,7 @@ const dust=new THREE.Points(dustGeo,new THREE.PointsMaterial({color:'#e8d4ad',si
 
 // 第三人称角色：只加载真实角色资产，不再用基础几何体拼装冒充
 const player=new THREE.Group();scene.add(player);player.position.set(0,0,11.5);
-let characterMixer=null,characterRoot=null,characterReady=false;
+let characterMixer=null,characterRoot=null,characterReady=false,characterGroundY=0;
 const characterStatus=document.querySelector('#characterStatus');
 const characterLoader=new GLTFLoader();
 characterStatus.textContent='角色模型：正在加载';
@@ -292,7 +292,7 @@ characterLoader.load('./assets/tutu.glb',gltf=>{
  const height=Math.max(size.y,.001);
  characterRoot.scale.setScalar(1.48/height);
  const scaledBox=new THREE.Box3().setFromObject(characterRoot);
- characterRoot.position.y-=scaledBox.min.y;
+ characterRoot.position.y-=scaledBox.min.y;\n characterGroundY=characterRoot.position.y;
  // 模型正面统一朝向行走方向（-Z）；如果源模型朝向不同，只需调整此处
  characterRoot.rotation.y=0;
  player.add(characterRoot);
@@ -355,6 +355,8 @@ function updatePlayer(dt,t){
   let dz=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
   const moving=dx!==0||dz!==0;
   if(moving){const l=Math.hypot(dx,dz);dx/=l;dz/=l;player.position.x=THREE.MathUtils.clamp(player.position.x+dx*dt*3.25,-7.15,7.15);player.position.z=THREE.MathUtils.clamp(player.position.z+dz*dt*3.25,-27,12.5);player.rotation.y=Math.atan2(dx,-dz);}
+  // 打印模型没有骨骼动画：以轻微重心起伏表现步伐，不伪称四肢骨骼动画
+  if(characterRoot)characterRoot.position.y=characterGroundY+(moving?Math.abs(Math.sin(t*9))*0.035:Math.sin(t*1.7)*0.006);
  }
  if(characterMixer)characterMixer.update(dt);
  nearby=-1;let best=2.25;
