@@ -32,7 +32,7 @@
 #furnitureCard h3{font:23px serif;font-weight:400;margin:9px 0}
 #furnitureCard p{font:12px/1.85 sans-serif;color:#d0c0a4;margin:0}
 #furnitureCard .close{margin-top:13px;color:#c6a77b;font:10px sans-serif;letter-spacing:.12em}
-#status.error{color:#ffb18b}
+#status.error,#characterStatus.error{color:#ffb18b}\n#characterStatus{position:fixed;z-index:4;right:24px;top:43px;color:#c9b99b99;font:9px sans-serif;letter-spacing:.1em;pointer-events:none}\n@media(max-width:650px){#characterStatus{top:33px;right:14px;font-size:8px}}
 #inspectTip{position:fixed;z-index:12;left:50%;top:22px;transform:translateX(-50%);display:none;color:#f0dfbd;background:#211b16c9;border:1px solid #c5a87877;padding:9px 14px;font:11px sans-serif;letter-spacing:.08em;white-space:nowrap;pointer-events:none}
 @media(max-width:650px){#furnitureCard{right:12px;bottom:60px;width:min(300px,calc(100vw - 24px));padding:16px}#inspectTip{top:64px;font-size:10px}}
 
@@ -42,7 +42,7 @@
 <body>
 <div id="scene"></div><div id="shade"></div><div id="grain"></div>
 <div id="mark">老物件集<small>一件家具，一段中国家庭的旧时光</small></div>
-<div id="status">旧木作 · 老家具 · 旧日常</div>
+<div id="status">旧木作 · 老家具 · 旧日常</div><div id="characterStatus">角色模型：等待资源</div>
 <div id="hint">W A S D / 方向键行走 · 靠近家具点击查看 · 拖动环绕 · ESC 返回</div>
 <div id="interact">靠近家具，点击查看</div>
 <section id="furnitureCard"><div class="eyebrow">旧物集 · 单件样品</div><h3 id="furnitureTitle">家具样品</h3><p id="furnitureDesc"></p><div class="close">拖动旋转 · 滚轮缩放 · ESC 返回</div></section><div id="inspectTip">正在查看家具 · 拖动旋转 · 滚轮缩放 · ESC 返回</div>
@@ -273,52 +273,43 @@ dustGeo.setAttribute('position',new THREE.BufferAttribute(dustPos,3));
 const dust=new THREE.Points(dustGeo,new THREE.PointsMaterial({color:'#e8d4ad',size:.025,transparent:true,opacity:.5,depthWrite:false}));scene.add(dust);
 
 
-// 第三人称逛集市：人物沿中央通道行走，镜头平滑跟随
+// 第三人称角色：只加载真实角色资产，不再用基础几何体拼装冒充
 const player=new THREE.Group();scene.add(player);player.position.set(0,0,11.5);
-const skin=material('#bd8f69'),shirt=material('#526052'),pants=material('#34302a'),shoe=material('#241e19'),hair=material('#29221c');
-const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.27,.62,5,10),shirt);torso.position.y=1.22;torso.castShadow=true;player.add(torso);
-const head=new THREE.Mesh(new THREE.SphereGeometry(.205,16,12),skin);head.position.y=1.86;head.castShadow=true;player.add(head);
-const hairCap=new THREE.Mesh(new THREE.SphereGeometry(.21,16,8,0,Math.PI*2,0,Math.PI*.52),hair);hairCap.position.y=1.96;player.add(hairCap);
-const limbs=[];
-function limb(x,y,len,r,mat){const pivot=new THREE.Group();pivot.position.set(x,y,0);const part=new THREE.Mesh(new THREE.CapsuleGeometry(r,len,.0,8),mat);part.position.y=-len*.43;part.castShadow=true;pivot.add(part);player.add(pivot);limbs.push(pivot);return pivot}
-const armL=limb(-.34,1.48,.58,.085,shirt),armR=limb(.34,1.48,.58,.085,shirt);
-const legL=limb(-.14,.82,.68,.105,pants),legR=limb(.14,.82,.68,.105,pants);
-for(const leg of [legL,legR]){const foot=new THREE.Mesh(new THREE.BoxGeometry(.19,.12,.34),shoe);foot.position.set(0,-.31,-.07);foot.castShadow=true;leg.add(foot)}
-// 人物升级：有层次的旧城逛市穿搭、五官、帽子、斜挎帆布包与衣物细节
-const jacket=material('#76533a'),jacketDark=material('#4b3528'),knit=material('#d1b995'),denim=material('#343d40'),leather=material('#4a3022'),canvas=material('#b69a70'),metalTrim=material('#b28a51');
-const neck=new THREE.Mesh(new THREE.CylinderGeometry(.09,.105,.18,12),skin);neck.position.y=1.72;player.add(neck);
-const inner=new THREE.Mesh(new THREE.CapsuleGeometry(.205,.55,4,10),knit);inner.position.set(0,1.22,-.018);inner.scale.set(.82,1,.88);player.add(inner);
-const coat=new THREE.Mesh(new THREE.CapsuleGeometry(.292,.64,5,12),jacket);coat.position.set(0,1.22,-.035);coat.castShadow=true;player.add(coat);
-const hem=new THREE.Mesh(new THREE.BoxGeometry(.49,.12,.29),jacketDark);hem.position.set(0,.91,-.025);player.add(hem);
-const collarL=new THREE.Mesh(new THREE.BoxGeometry(.14,.23,.055),knit);collarL.position.set(-.105,1.55,-.205);collarL.rotation.z=-.22;collarL.rotation.x=-.18;player.add(collarL);
-const collarR=collarL.clone();collarR.position.x=.105;collarR.rotation.z=.22;player.add(collarR);
-for(let i=0;i<4;i++){const b=new THREE.Mesh(new THREE.SphereGeometry(.022,8,8),metalTrim);b.position.set(.025,1.42-i*.13,-.294);player.add(b)}
-for(const x of [-.19,.19]){const pocket=new THREE.Mesh(new THREE.BoxGeometry(.13,.14,.025),jacketDark);pocket.position.set(x,1.27,-.276);player.add(pocket);const flap=new THREE.Mesh(new THREE.BoxGeometry(.15,.045,.035),jacket);flap.position.set(x,1.35,-.29);player.add(flap)}
-// 帽子：旧式鸭舌帽，帽檐朝人物前方
-const cap=new THREE.Mesh(new THREE.SphereGeometry(.225,18,10,0,Math.PI*2,0,Math.PI*.52),jacketDark);cap.position.set(0,2.025,0);cap.scale.set(1.06,.62,1.04);player.add(cap);
-const brim=new THREE.Mesh(new THREE.SphereGeometry(.19,16,8,0,Math.PI*2,0,Math.PI*.5),jacketDark);brim.position.set(0,1.99,-.145);brim.scale.set(1,.12,.72);player.add(brim);
-const capBadge=new THREE.Mesh(new THREE.CircleGeometry(.045,16),metalTrim);capBadge.position.set(0,2.015,-.213);player.add(capBadge);
-// 眼睛、眉毛、鼻子和耳朵，朝向行走前方（-Z）
-const eyeWhite=material('#eadfca'),eyeDark=material('#28231e');
-for(const x of [-.075,.075]){
- const eye=new THREE.Mesh(new THREE.SphereGeometry(.027,10,8),eyeWhite);eye.position.set(x,1.865,-.188);eye.scale.set(1,.82,.5);player.add(eye);
- const pupil=new THREE.Mesh(new THREE.SphereGeometry(.013,8,8),eyeDark);pupil.position.set(x,1.865,-.207);player.add(pupil);
- const brow=new THREE.Mesh(new THREE.BoxGeometry(.065,.012,.018),hair);brow.position.set(x,1.916,-.19);brow.rotation.z=x<0?-.12:.12;player.add(brow);
-}
-const nose=new THREE.Mesh(new THREE.SphereGeometry(.027,8,8),skin);nose.position.set(0,1.82,-.205);nose.scale.set(.8,.8,.8);player.add(nose);
-for(const x of [-.205,.205]){const ear=new THREE.Mesh(new THREE.SphereGeometry(.052,10,8),skin);ear.position.set(x,1.85,0);ear.scale.set(.65,1,.65);player.add(ear)}
-// 帆布斜挎包：包体在人物右后侧，肩带跨过胸前
-const bag=new THREE.Mesh(new THREE.BoxGeometry(.34,.4,.16),canvas);bag.position.set(.28,.77,.18);bag.rotation.z=-.12;bag.castShadow=true;player.add(bag);
-const bagFlap=new THREE.Mesh(new THREE.BoxGeometry(.35,.13,.18),leather);bagFlap.position.set(.28,.98,.17);player.add(bagFlap);
-const bagSeam=new THREE.Mesh(new THREE.BoxGeometry(.24,.012,.012),metalTrim);bagSeam.position.set(.28,.97,.075);player.add(bagSeam);
-const strap=new THREE.Mesh(new THREE.TorusGeometry(.31,.027,6,28,Math.PI*1.03),leather);strap.position.set(-.015,1.22,-.17);strap.rotation.z=-.55;strap.rotation.x=Math.PI/2;player.add(strap);
-// 手掌与袖口，让手臂不再像单纯胶囊
-for(const arm of [armL,armR]){
- const cuff=new THREE.Mesh(new THREE.CylinderGeometry(.09,.09,.095,10),jacketDark);cuff.position.y=-.48;arm.add(cuff);
- const hand=new THREE.Mesh(new THREE.SphereGeometry(.085,12,10),skin);hand.position.y=-.59;hand.scale.set(.82,1,.72);arm.add(hand);
-}
-// 旧帆布围巾尾端，增加行走时的轮廓层次
-const scarf=new THREE.Mesh(new THREE.BoxGeometry(.13,.34,.045),material('#a84c35'));scarf.position.set(.13,1.42,.19);scarf.rotation.z=-.18;player.add(scarf);
+let characterMixer=null,characterRoot=null,characterReady=false;
+const characterStatus=document.querySelector('#characterStatus');
+const characterLoader=new GLTFLoader();
+characterStatus.textContent='角色模型：正在加载';
+characterLoader.load('./assets/tutu.glb',gltf=>{
+ characterRoot=gltf.scene;
+ characterRoot.name='TutuCharacterAsset';
+ characterRoot.traverse(node=>{
+  if(node.isMesh){node.castShadow=true;node.receiveShadow=true;
+   if(node.material){node.material.side=THREE.FrontSide}
+  }
+ });
+ const box=new THREE.Box3().setFromObject(characterRoot);
+ const size=box.getSize(new THREE.Vector3());
+ const height=Math.max(size.y,.001);
+ characterRoot.scale.setScalar(1.48/height);
+ const scaledBox=new THREE.Box3().setFromObject(characterRoot);
+ characterRoot.position.y-=scaledBox.min.y;
+ // 模型正面统一朝向行走方向（-Z）；如果源模型朝向不同，只需调整此处
+ characterRoot.rotation.y=0;
+ player.add(characterRoot);
+ if(gltf.animations&&gltf.animations.length){
+  characterMixer=new THREE.AnimationMixer(characterRoot);
+  const clips=gltf.animations;
+  const walkClip=clips.find(c=>/walk|run|move|行走/i.test(c.name))||clips[0];
+  characterMixer.clipAction(walkClip).play();
+ }
+ characterReady=true;
+ characterStatus.textContent='角色模型：已加载';
+ characterStatus.classList.remove('error');
+},undefined,error=>{
+ console.error('角色 GLB 加载失败：',error);
+ characterStatus.textContent='角色模型缺失：请放入 assets/tutu.glb';
+ characterStatus.classList.add('error');
+});
 const stalls=[
  {x:-3.25,z:4.2,title:'老木家具摊',desc:'这家摊主专收老榆木家具和旧木作，桌面有岁月留下的包浆，边角还能看到搬家磕碰的痕迹。',samples:'样品：中式老茶桌、木扶手椅、旧木案几。可以近距离查看木纹、结构与保存状态。'},
  {x:3.25,z:-1.8,title:'搬家清仓摊',desc:'一户人家搬迁留下的旧家具，实用为主，不追求成套。',samples:'样品：旧皮沙发、茶桌、单人扶手椅。适合淘客厅组合。'},
@@ -357,17 +348,15 @@ function openStall(i){activeStall=i;cardOpen=true;document.querySelector('#stall
 function closeStall(){cardOpen=false;card.classList.remove('show')}
 const keys={};window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();keys[k]=true;if(k==='escape'&&inspectIndex>=0)closeFurniture();else if(k==='escape'&&cardOpen)closeStall()});
 window.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
-let walkPhase=0,nearby=-1;
+let nearby=-1;
 function updatePlayer(dt,t){
  if(!cardOpen){
   let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0);
   let dz=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
   const moving=dx!==0||dz!==0;
-  if(moving){const l=Math.hypot(dx,dz);dx/=l;dz/=l;player.position.x=THREE.MathUtils.clamp(player.position.x+dx*dt*3.25,-7.15,7.15);player.position.z=THREE.MathUtils.clamp(player.position.z+dz*dt*3.25,-27,12.5);player.rotation.y=Math.atan2(dx,-dz);walkPhase+=dt*9;}
-  else walkPhase*=.84;
-  const swing=Math.sin(walkPhase)*.48;armL.rotation.x=swing;armR.rotation.x=-swing;legL.rotation.x=-swing;legR.rotation.x=swing;
-  torso.position.y=1.22+(moving?Math.abs(Math.sin(walkPhase))*.035:0);
+  if(moving){const l=Math.hypot(dx,dz);dx/=l;dz/=l;player.position.x=THREE.MathUtils.clamp(player.position.x+dx*dt*3.25,-7.15,7.15);player.position.z=THREE.MathUtils.clamp(player.position.z+dz*dt*3.25,-27,12.5);player.rotation.y=Math.atan2(dx,-dz);}
  }
+ if(characterMixer)characterMixer.update(dt);
  nearby=-1;let best=2.25;
  stalls.forEach((st,i)=>{const d=Math.hypot(player.position.x-st.x,player.position.z-st.z);if(d<best){best=d;nearby=i}});
  activeStall=nearby;
