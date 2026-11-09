@@ -168,11 +168,11 @@ function makeFurnitureTag(spec,pos,height){
  const c=document.createElement('canvas');c.width=640;c.height=360;const g=c.getContext('2d');
  g.fillStyle='#e8d7b5';g.fillRect(0,0,640,360);g.fillStyle='#6b3d2b';g.fillRect(0,0,640,68);
  g.strokeStyle='#9b7950';g.lineWidth=10;g.strokeRect(9,9,622,342);
- g.fillStyle='#fff0d0';g.font='bold 34px serif';g.textAlign='center';g.fillText('旧货实物价签',320,46);
+ g.fillStyle='#fff0d0';g.font='bold 34px serif';g.textAlign='center';g.fillText('旧家具样品信息牌',320,46);
  g.fillStyle='#38291e';g.textAlign='left';g.font='bold 43px serif';g.fillText(spec.name,34,127);
  g.font='27px sans-serif';g.fillText('年代参考：'+spec.era,34,184);
  g.fillText('材质：'+spec.material,34,230);
- g.fillText('成色：'+spec.condition,34,276);
+ g.fillText('成色参考：'+spec.condition,34,276);
  g.fillStyle='#9b3024';g.font='bold 34px serif';g.fillText('示例价 '+spec.price,34,326);
  const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;
  const tag=new THREE.Mesh(new THREE.PlaneGeometry(1.12,.63),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));
